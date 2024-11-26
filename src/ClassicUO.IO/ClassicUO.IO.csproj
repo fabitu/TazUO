@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
-    <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\..\external\FNA\FNA.csproj" />
     <ProjectReference Include="..\..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
   </ItemGroup>
 
