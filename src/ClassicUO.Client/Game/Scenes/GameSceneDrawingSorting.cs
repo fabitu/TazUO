@@ -437,6 +437,7 @@ namespace ClassicUO.Game.Scenes
                     return false;
                 }
             }
+            //EP: Remove os telhados
             else if (_noDrawRoofs && itemData.IsRoof)
             {
                 if (_alphaChanged)

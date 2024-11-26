@@ -32,12 +32,15 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -340,8 +343,60 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case InfoBarVars.TithingPoints: return World.Player.TithingPoints.ToString();
 
+                //EP: Custom Item
+                case InfoBarVars.CustomItem:
+                    {
+                        if (SelectedObject.Object != null)
+                            return GetInfo();
+                        return "";
+                    }
+
                 default: return "";
             }
+        }
+
+        public string GetInfo()
+        {
+            StringBuilder sb = new();
+            try
+            {
+                sb.Append($" CX:{Mouse.Position.X} CY:{Mouse.Position.Y}");
+                sb.Append($" PX:{World.Player.X} PY:{World.Player.Y} PZ:{World.Player.Z}");
+                sb.Append($" Type: {SelectedObject.Object.GetType().Name}");
+
+                if (SelectedObject.Object is GameObject gameObject)
+                {
+                    sb.Append($" Graphic: 0x0{gameObject.Graphic.ToString("X")}/{gameObject.Graphic.ToString()} ");
+                    sb.Append($" X:{gameObject.X} Y:{gameObject.Y} Z:{gameObject.Z} ");                    
+                }
+
+                if (SelectedObject.Object is Land land)
+                {
+                    sb.Append($" Name: {land.TileData.Name} Flags: {land.TileData.Flags}");
+                }
+                else if (SelectedObject.Object is Static stat)
+                {
+                    sb.Append($" Name: {stat.Name}  Flags: {stat.ItemData.Flags}");
+                }
+                else if (SelectedObject.Object is Item item)
+                {
+                    sb.Append($" Name: {item.ItemData.Name} Flags: {item.ItemData.Flags}");
+                }
+                else if (SelectedObject.Object is Mobile mobile)
+                {
+                    if (SelectedObject.Object is PlayerMobile playerMobile)
+                    {
+                        sb.Append($" Name: {playerMobile.Name} str{playerMobile.Strength} luck{playerMobile.Luck} {playerMobile.Hits}/{playerMobile.HitsMax}");
+                    }
+                    else
+                    {
+                        sb.Append($" Name: {mobile.Name} {mobile.Hits}/{mobile.HitsMax}");
+                    }
+                }
+            }
+            catch { }
+
+            return sb.ToString();
         }
 
         private ushort GetVarHue(InfoBarVars var)

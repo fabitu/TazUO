@@ -398,11 +398,7 @@ namespace ClassicUO.Game.Scenes
 
             Macros.Save();
             InfoBars.Save();
-            ProfileManager.UnLoadProfile();
-
-            StaticFilters.CleanCaveTextures();
-            StaticFilters.CleanTreeTextures();
-
+            ProfileManager.UnLoadProfile();       
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _lightRenderTarget?.Dispose();

@@ -97,7 +97,11 @@ namespace ClassicUO.Game
 
 
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
+        public const ushort TREE_STUMPED_REPLACE_GRAPHIC = 0x0E58;
         public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
+
+        public const ushort WALL_REPLACE_GRAPHIC = 0x0066;//0x0144;
+        public const ushort DOOR_REPLACE_GRAPHIC = 0x0066;//0x0144;
 
         public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 50;
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 1000;

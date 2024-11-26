@@ -1,6 +1,6 @@
 ﻿#region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,13 @@
 
 #endregion
 
+using ClassicUO.Assets;
+using ClassicUO.Game.Data.Preferences;
+using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using ClassicUO.Configuration;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {
@@ -48,50 +47,93 @@ namespace ClassicUO.Game.Data
         STFF_STUMP = 0x02,
         STFF_STUMP_HATCHED = 0x04,
         STFF_VEGETATION = 0x08,
-        STFF_WATER = 0x10
+        STFF_WATER = 0x10,
+        STFF_WALL = 0x10
     }
 
     internal static class StaticFilters
     {
         private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles = new STATIC_TILES_FILTER_FLAGS[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
 
-        public static readonly List<ushort> CaveTiles = new List<ushort>();
-        public static readonly List<ushort> TreeTiles = new List<ushort>();
+        public static List<ushort> CaveTiles = [];
+        public static List<ushort> TreeTiles = [];
+        public static List<StaticCustomItens> WallTiles = [];
+        public static List<StaticCustomItens> Doors = [];
+        public static string DirectoryPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_directoryPath))
+                {
+                    _directoryPath = EnsureDirectoryPath();
+                }
+                return _directoryPath;
+            }
+        }
+        static string _directoryPath;
 
         public static void Load()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+            LoadCaveTiles();
+            LoadVegetationTiles();
+            LoadTreesTiles();
+            WallTiles = new PreferenceManager("wall.json", Constants.WALL_REPLACE_GRAPHIC).LoadFile();
+            Doors = new PreferenceManager("doors.json", Constants.WALL_REPLACE_GRAPHIC).LoadFile();            
+        }
 
-            if (!Directory.Exists(path))
+        private static string EnsureDirectoryPath()
+        {
+            string directoryPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+
+            if (!Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(directoryPath);
             }
 
-            string cave = Path.Combine(path, "cave.txt");
-            string vegetation = Path.Combine(path, "vegetation.txt");
-            string trees = Path.Combine(path, "tree.txt");
+            return directoryPath;
+        }
+        private static void LoadCaveTiles()
+        {
+            string cave = Path.Combine(DirectoryPath, "cave.txt");
 
-
+            //Gera o Arquivo
             if (!File.Exists(cave))
             {
-                using (StreamWriter writer = new StreamWriter(cave))
+                using StreamWriter writer = new(cave);
+                for (int i = 0x053B; i < 0x0553 + 1; i++)
                 {
-                    for (int i = 0x053B; i < 0x0553 + 1; i++)
+                    if (i != 0x0550)
                     {
-                        if (i != 0x0550)
-                        {
-                            writer.WriteLine(i);
-                        }
+                        writer.WriteLine(i);
                     }
                 }
             }
 
+            TextFileParser caveParser = new(File.ReadAllText(cave), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+
+            while (!caveParser.IsEOF())
+            {
+                List<string> ss = caveParser.ReadTokens();
+
+                if (ss != null && ss.Count != 0)
+                {
+                    if (ushort.TryParse(ss[0], out ushort graphic))
+                    {
+                        _filteredTiles[graphic] |= STATIC_TILES_FILTER_FLAGS.STFF_CAVE;
+                        CaveTiles.Add(graphic);
+                    }
+                }
+            }
+        }
+        private static void LoadVegetationTiles()
+        {
+            string vegetation = Path.Combine(DirectoryPath, "vegetation.txt");
+
             if (!File.Exists(vegetation))
             {
-                using (StreamWriter writer = new StreamWriter(vegetation))
+                using StreamWriter writer = new(vegetation);
+                ushort[] vegetationTiles =
                 {
-                    ushort[] vegetationTiles =
-                    {
                         0x0D45, 0x0D46, 0x0D47, 0x0D48, 0x0D49, 0x0D4A, 0x0D4B, 0x0D4C, 0x0D4D, 0x0D4E, 0x0D4F,
                         0x0D50, 0x0D51, 0x0D52, 0x0D53, 0x0D54, 0x0D5C, 0x0D5D, 0x0D5E, 0x0D5F, 0x0D60, 0x0D61,
                         0x0D62, 0x0D63, 0x0D64, 0x0D65, 0x0D66, 0x0D67, 0x0D68, 0x0D69, 0x0D6D, 0x0D73, 0x0D74,
@@ -108,30 +150,50 @@ namespace ClassicUO.Game.Data
                         0x0CA1, 0x0CA2, 0x0CA3, 0x0CA4, 0x0CA7, 0x0CAC, 0x0CAD, 0x0CAE, 0x0CAF, 0x0CB0, 0x0CB1,
                         0x0CB2, 0x0CB3, 0x0CB4, 0x0CB5, 0x0CB6, 0x0C45, 0x0C46, 0x0C49, 0x0C47, 0x0C48, 0x0C4A,
                         0x0C4B, 0x0C4C, 0x0C4D, 0x0C4E, 0x0C37, 0x0C38, 0x0CBA, 0x0D2F, 0x0D32, 0x0D33, 0x0D3F,
-                        0x0D40, 0x0CE9
+                        0x0D40, 0x0CE9, 0x0CEA
                     };
 
-                    for (int i = 0; i < vegetationTiles.Length; i++)
+                for (int i = 0; i < vegetationTiles.Length; i++)
+                {
+                    ushort g = vegetationTiles[i];
+
+                    if (TileDataLoader.Instance.StaticData[g].IsImpassable)
                     {
-                        ushort g = vegetationTiles[i];
-
-                        if (TileDataLoader.Instance.StaticData[g].IsImpassable)
-                        {
-                            continue;
-                        }
-
-                        writer.WriteLine(g);
+                        continue;
                     }
+
+                    writer.WriteLine(g);
                 }
             }
 
+            char[] delimiters = new[] { ' ', '\t', ',' };
+            char[] comments = new[] { '#', ';' };
+            char[] quotes = new[] { '"', '"' };
+            TextFileParser vegetationParser = new(File.ReadAllText(vegetation), delimiters, comments, quotes);
+
+            while (!vegetationParser.IsEOF())
+            {
+                List<string> ss = vegetationParser.ReadTokens();
+
+                if (ss != null && ss.Count != 0)
+                {
+                    if (ushort.TryParse(ss[0], out ushort graphic))
+                    {
+                        _filteredTiles[graphic] |= STATIC_TILES_FILTER_FLAGS.STFF_VEGETATION;
+                    }
+                }
+            }
+        }
+        private static void LoadTreesTiles()
+        {
+            string vegetation = Path.Combine(DirectoryPath, "vegetation.txt");
+            string trees = Path.Combine(DirectoryPath, "tree.txt");
             if (!File.Exists(trees))
             {
-                using (StreamWriter writer = new StreamWriter(trees))
-                using (StreamWriter writerveg = new StreamWriter(vegetation, true))
+                using StreamWriter writer = new(trees);
+                using StreamWriter writerveg = new(vegetation, true);
+                ushort[] treeTiles =
                 {
-                    ushort[] treeTiles =
-                    {
                         0x0C95, 0x0C96, 0x0C99, 0x0C9B, 0x0C9C, 0x0C9D, 0x0C9E, 0x0CA6, 0x0CA8, 0x0CAA, 0x0CAB,
                         0x0CC9, 0x0CCA, 0x0CCB, 0x0CCC, 0x0CCD, 0x0CD0, 0x0CD3, 0x0CD6, 0x0CD8, 0x0CDA, 0x0CDD,
                         0x0CE0, 0x0CE3, 0x0CE6, 0x0CF8, 0x0CFB, 0x0CFE, 0x0D01, 0x0D37, 0x0D38, 0x0D41, 0x0D42,
@@ -140,64 +202,45 @@ namespace ClassicUO.Game.Data
                         0x12B7, 0x12B8, 0x12B9, 0x12BA, 0x12BB, 0x12BC, 0x12BD
                     };
 
-                    for (int i = 0; i < treeTiles.Length; i++)
-                    {
-                        ushort graphic = treeTiles[i];
-                        byte flag = 1;
-
-                        switch (graphic)
-                        {
-                            case 0x0C9E:
-                            case 0x0CA8:
-                            case 0x0CAA:
-                            case 0x0CAB:
-                            case 0x0CC9:
-                            case 0x0CF8:
-                            case 0x0CFB:
-                            case 0x0CFE:
-                            case 0x0D01:
-                            case 0x12B6:
-                            case 0x12B7:
-                            case 0x12B8:
-                            case 0x12B9:
-                            case 0x12BA:
-                            case 0x12BB:
-                                flag = 0;
-
-                                break;
-                        }
-
-                        if (!TileDataLoader.Instance.StaticData[graphic].IsImpassable)
-                        {
-                            writerveg.WriteLine(graphic);
-                        }
-                        else
-                        {
-                            writer.WriteLine($"{graphic}={flag}");
-                        }
-                    }
-                }
-            }
-
-
-            TextFileParser caveParser = new TextFileParser(File.ReadAllText(cave), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
-
-            while (!caveParser.IsEOF())
-            {
-                List<string> ss = caveParser.ReadTokens();
-
-                if (ss != null && ss.Count != 0)
+                for (int i = 0; i < treeTiles.Length; i++)
                 {
-                    if (ushort.TryParse(ss[0], out ushort graphic))
+                    ushort graphic = treeTiles[i];
+                    byte flag = 1;
+
+                    switch (graphic)
                     {
-                        _filteredTiles[graphic] |= STATIC_TILES_FILTER_FLAGS.STFF_CAVE;
-                        CaveTiles.Add(graphic);
+                        case 0x0C9E:
+                        case 0x0CA8:
+                        case 0x0CAA:
+                        case 0x0CAB:
+                        case 0x0CC9:
+                        case 0x0CF8:
+                        case 0x0CFB:
+                        case 0x0CFE:
+                        case 0x0D01:
+                        case 0x12B6:
+                        case 0x12B7:
+                        case 0x12B8:
+                        case 0x12B9:
+                        case 0x12BA:
+                        case 0x12BB:
+                            flag = 0;
+
+                            break;
+                    }
+
+                    if (!TileDataLoader.Instance.StaticData[graphic].IsImpassable)
+                    {
+                        writerveg.WriteLine(graphic);
+                    }
+                    else
+                    {
+                        writer.WriteLine($"{graphic}={flag}");
                     }
                 }
             }
 
-
-            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(trees), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
+            TextFileParser stumpsParser = new(File.ReadAllText(trees), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!stumpsParser.IsEOF())
             {
@@ -219,53 +262,7 @@ namespace ClassicUO.Game.Data
                     }
                 }
             }
-
-
-            TextFileParser vegetationParser = new TextFileParser(File.ReadAllText(vegetation), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
-
-            while (!vegetationParser.IsEOF())
-            {
-                List<string> ss = vegetationParser.ReadTokens();
-
-                if (ss != null && ss.Count != 0)
-                {
-                    if (ushort.TryParse(ss[0], out ushort graphic))
-                    {
-                        _filteredTiles[graphic] |= STATIC_TILES_FILTER_FLAGS.STFF_VEGETATION;
-                    }
-                }
-            }
-        }
-
-        public static void CleanCaveTextures()
-        {
-            //foreach (ushort graphic in CaveTiles)
-            //{
-            //    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-            //    if (texture != null)
-            //    {
-            //        texture.Ticks = 0;
-            //    }
-            //}
-
-            //ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
-        }
-
-        public static void CleanTreeTextures()
-        {
-            //foreach (ushort graphic in TreeTiles)
-            //{
-            //    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-            //    if (texture != null)
-            //    {
-            //        texture.Ticks = 0;
-            //    }
-            //}
-
-            //ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
-        }
+        }       
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsTree(ushort g, out int index)
@@ -357,15 +354,13 @@ namespace ClassicUO.Game.Data
         {
             return g == 0x038A;
         }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOutStamina()
         {
             return World.Player.Stamina != World.Player.StaminaMax;
-        }
-        // ## BEGIN - END ## // MISC2
+        }        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool isHumanAndMonster(ushort g)
+        public static bool IsHumanAndMonster(ushort g)
         {
             switch (g)
             {
@@ -381,22 +376,7 @@ namespace ClassicUO.Game.Data
 
                 default:
                     return false;
-            }
-            // foreach (Mobile mobile in World.Mobiles.Values)
-            // {
-            //     if (World.Mobiles.Get(mobile.Serial).Distance <= 1 && mobile.IsHuman)
-            //     {
-            //         return true;
-            //     }
-
-            //     if (World.Mobiles.Get(mobile.Serial).Distance <= 1 && !mobile.IsHuman)
-            //     {
-            //         return true;
-            //     }
-            //     return false;
-            // }
-            // return false;
+            }     
         }
     }
-    
 }

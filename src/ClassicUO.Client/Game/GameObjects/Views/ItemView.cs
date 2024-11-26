@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic = DisplayedGraphic;
             bool partial = ItemData.IsPartialHue;
             if (ProfileManager.CurrentProfile.AutoAvoidObstacules) {
-                if  (StaticFilters.isHumanAndMonster(graphic))
+                if  (StaticFilters.IsHumanAndMonster(graphic))
                 {
                     if (StaticFilters.IsOutStamina())
                     {

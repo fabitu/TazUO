@@ -181,7 +181,8 @@ namespace ClassicUO.Game.Managers
         SwingSpeedInc,
         StatsCap,
         NameNotoriety,
-        TithingPoints
+        TithingPoints,
+        CustomItem
     }
 
     internal enum InfoBarVarsOutlands

@@ -5321,14 +5321,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (_currentProfile.EnableCaveBorder != _enableCaveBorder.IsChecked)
-            {
-                StaticFilters.CleanCaveTextures();
+            {                
                 _currentProfile.EnableCaveBorder = _enableCaveBorder.IsChecked;
             }
 
             if (_currentProfile.TreeToStumps != _treeToStumps.IsChecked)
-            {
-                StaticFilters.CleanTreeTextures();
+            {                
                 _currentProfile.TreeToStumps = _treeToStumps.IsChecked;
             }
 

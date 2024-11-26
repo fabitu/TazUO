@@ -1823,8 +1823,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
-                case MacroType.ToggleTreeStumps:
-                    StaticFilters.CleanTreeTextures();
+                case MacroType.ToggleTreeStumps:                    
                     ProfileManager.CurrentProfile.TreeToStumps = !ProfileManager.CurrentProfile.TreeToStumps;
 
                     break;
@@ -1834,8 +1833,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
-                case MacroType.ToggleCaveTiles:
-                    StaticFilters.CleanCaveTextures();
+                case MacroType.ToggleCaveTiles:               
                     ProfileManager.CurrentProfile.EnableCaveBorder = !ProfileManager.CurrentProfile.EnableCaveBorder;
 
                     break;

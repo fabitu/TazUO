@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Managers
         }
 
         public static bool IsTemporarilyShowing { get; private set; }
-        public static bool IsShowing => IsPermaToggled || IsTemporarilyShowing || Keyboard.Ctrl && Keyboard.Shift;
+        public static bool IsShowing => IsPermaToggled || IsTemporarilyShowing || (Keyboard.Ctrl && Keyboard.Shift && !Keyboard.Alt);
 
         private static List<NameOverheadOption> Options { get; set; } = new List<NameOverheadOption>();
 
