@@ -59,7 +59,6 @@ namespace ClassicUO.Game.Data
     public class ClientFeatures
     {
         public CharacterListFlags Flags { get; private set; }
-
         public bool TooltipsEnabled { get; private set; } = true;
         public bool PopupEnabled { get; private set; }
         public bool PaperdollBooks { get; private set; }

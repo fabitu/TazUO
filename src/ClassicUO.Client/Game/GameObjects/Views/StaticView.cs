@@ -78,10 +78,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
             }
-            else if (
-                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
-                && Distance > World.ClientViewRange
-            )
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
                 partial = false;
@@ -103,9 +100,7 @@ namespace ClassicUO.Game.GameObjects
                 posX,
                 posY,
                 hueVec,
-                ProfileManager.CurrentProfile.ShadowsEnabled
-                    && ProfileManager.CurrentProfile.ShadowsStatics
-                    && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
+                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
                 depth,
                 ProfileManager.CurrentProfile.AnimatedWaterEffect && ItemData.IsWet
             );
@@ -121,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
         //EP: ReplaceDoor
         private static void ReplaceDoor(ref ushort graphic)
         {
-            if (ProfileManager.CurrentProfile.ChangeWallAndDoors && !(Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift))
+            if (ProfileManager.CurrentProfile.ChangeWallAndDoors && ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 var _graphic = graphic;
                 var replaceGraphic = Constants.WALL_REPLACE_GRAPHIC;
@@ -136,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
         //EP: ReplaceWall
         private static void ReplaceWall(ref ushort graphic)
         {
-            if (ProfileManager.CurrentProfile.ChangeWallAndDoors && !(Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift))
+            if (ProfileManager.CurrentProfile.ChangeWallAndDoors && ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 var _graphic = graphic;
                 var customReplaceWall = StaticFilters.WallTiles.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
@@ -150,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
         {
             bool isTree = StaticFilters.IsTree(graphic, out int treeType);
 
-            if (isTree && ProfileManager.CurrentProfile.TreeToStumps && !(Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift))
+            if (isTree && ProfileManager.CurrentProfile.TreeToStumps && ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 if (treeType == 0)
                     graphic = Constants.TREE_STUMPED_REPLACE_GRAPHIC;

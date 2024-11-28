@@ -40,7 +40,6 @@ namespace ClassicUO.Configuration
     {
         public static Profile CurrentProfile { get; private set; }
         public static string ProfilePath { get; private set; }
-
         public static void Load(string servername, string username, string charactername)
         {
             string rootpath;
@@ -68,8 +67,6 @@ namespace ClassicUO.Configuration
 
             ClassicUO.Game.Managers.IgnoreManager.Initialize();
         }
-
-
         private static void ValidateFields(Profile profile)
         {
             if (profile == null)
@@ -102,7 +99,6 @@ namespace ClassicUO.Configuration
                 profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 480);
             }
         }
-
         public static void UnLoadProfile()
         {
             CurrentProfile = null;

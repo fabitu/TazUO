@@ -152,6 +152,9 @@ namespace ClassicUO.Game.Managers
             infoBarItems.Add(new InfoBarItem(ResGeneral.Mana, InfoBarVars.Mana, 0x1ED));
             infoBarItems.Add(new InfoBarItem(ResGeneral.Stam, InfoBarVars.Stamina, 0x22E));
             infoBarItems.Add(new InfoBarItem(ResGeneral.Weight, InfoBarVars.Weight, 0x3D2));
+#if DEBUG
+            infoBarItems.Add(new InfoBarItem(ResGeneral.TileInfo, InfoBarVars.CustomItem, 0x4410));
+#endif
         }
     }
 

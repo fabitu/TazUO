@@ -201,6 +201,7 @@ namespace ClassicUO.Game.Scenes
             SpellDefinition.LoadCustomSpells();
             SpellVisualRangeManager.Instance.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
+            //EP: CheckUpdate
             if (!UpdateManager.SkipUpdateCheck && UpdateManager.HasUpdate)
             {
                 UpdateManager.SendDelayedUpdateMessage();

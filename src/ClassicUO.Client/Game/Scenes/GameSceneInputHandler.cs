@@ -454,7 +454,20 @@ namespace ClassicUO.Game.Scenes
             if (!UIManager.IsMouseOverWorld)
             {
                 return false;
+            }           
+
+            //EP: Open Static Filter Gump
+            if (Keyboard.Ctrl && Keyboard.Alt)
+            {
+                ushort? graphic = null;
+                if (SelectedObject.Object is GameObject gameObject)
+                {
+                    graphic = gameObject.Graphic;
+                }
+
+                //OpenFakeGump(SelectedObject.Object);
             }
+
 
             if (World.CustomHouseManager != null)
             {
@@ -1322,6 +1335,13 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
+            //EP: Enable/Disable Static Filter
+            if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift)
+            {
+                ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
+                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
+            }
+
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
             {
                 return;

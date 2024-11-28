@@ -53,50 +53,28 @@ namespace ClassicUO.Game
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<uint> _toRemove = new List<uint>();
         private static uint _timeToDelete;
-
         public static Point RangeSize;
-
         public static PlayerMobile Player { get; private set; }
-
         public static HouseCustomizationManager CustomHouseManager;
-
         public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
-
         public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
-
         public static uint LastObject, ObjectToRemove;
-
         public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
         public static DurabilityManager DurabilityManager { get; } = new DurabilityManager();
-
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
-
         public static PartyManager Party { get; } = new PartyManager();
-
         public static HouseManager HouseManager { get; } = new HouseManager();
-
         public static Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
-
         public static Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
-
         public static Map.Map Map { get; private set; }
-
         public static byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
-
         public static bool SkillsRequested { get; set; }
-
         public static Season Season { get; private set; } = Season.Summer;
         public static Season OldSeason { get; set; } = Season.Summer;
-
         public static int OldMusicIndex { get; set; }
-
         public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
-
         public static JournalManager Journal { get; } = new JournalManager();
-
         public static CoolDownBarManager CoolDownBarManager { get; } = new CoolDownBarManager();
-
-
         public static int MapIndex
         {
             get => Map?.Index ?? -1;
@@ -153,9 +131,7 @@ namespace ClassicUO.Game
                 }
             }
         }
-
         public static bool InGame => Player != null && Map != null;
-
         public static IsometricLight Light { get; } = new IsometricLight
         {
             Overall = 0,
@@ -163,15 +139,9 @@ namespace ClassicUO.Game
             RealOverall = 0,
             RealPersonal = 0
         };
-
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
-
         public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
-
         public static string ServerName { get; set; } = "_";
-
-
-
         public static void CreatePlayer(uint serial)
         {
             if (ProfileManager.CurrentProfile == null)
@@ -190,7 +160,6 @@ namespace ClassicUO.Game
 
             Log.Trace($"Player [0x{serial:X8}] created");
         }
-
         public static void ChangeSeason(Season season, int music)
         {
             Season = season;
@@ -217,7 +186,6 @@ namespace ClassicUO.Game
             }
         }
 
-
         /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool CheckToRemove(Entity obj, int distance)
         {
@@ -227,7 +195,6 @@ namespace ClassicUO.Game
             return Math.Max(Math.Abs(obj.X - RangeSize.X), Math.Abs(obj.Y - RangeSize.Y)) > distance;
         }
         */
-
         public static void Update()
         {
             if (Player != null)
@@ -372,7 +339,6 @@ namespace ClassicUO.Game
                 WMapManager.RemoveUnupdatedWEntity();
             }
         }
-
         public static bool Contains(uint serial)
         {
             if (SerialHelper.IsItem(serial))
@@ -382,7 +348,6 @@ namespace ClassicUO.Game
 
             return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
         }
-
         public static Entity Get(uint serial)
         {
             Entity ent;
@@ -413,7 +378,6 @@ namespace ClassicUO.Game
 
             return ent;
         }
-
         public static Item GetOrCreateItem(uint serial)
         {
             Item item = Items.Get(serial);
@@ -432,7 +396,6 @@ namespace ClassicUO.Game
 
             return item;
         }
-
         public static Mobile GetOrCreateMobile(uint serial)
         {
             Mobile mob = Mobiles.Get(serial);
@@ -451,7 +414,6 @@ namespace ClassicUO.Game
 
             return mob;
         }
-
         public static void RemoveItemFromContainer(uint serial)
         {
             Item it = Items.Get(serial);
@@ -461,7 +423,6 @@ namespace ClassicUO.Game
                 RemoveItemFromContainer(it);
             }
         }
-
         public static void RemoveItemFromContainer(Item obj)
         {
             uint containerSerial = obj.Container;
@@ -497,7 +458,6 @@ namespace ClassicUO.Game
             obj.Previous = null;
             obj.RemoveFromTile();
         }
-
         public static bool RemoveItem(uint serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
@@ -529,7 +489,6 @@ namespace ClassicUO.Game
 
             return true;
         }
-
         public static bool RemoveMobile(uint serial, bool forceRemove = false)
         {
             Mobile mobile = Mobiles.Get(serial);
@@ -560,50 +519,6 @@ namespace ClassicUO.Game
 
             return true;
         }
-
-        public static void SpawnEffect
-        (
-            GraphicEffectType type,
-            uint source,
-            uint target,
-            ushort graphic,
-            ushort hue,
-            ushort srcX,
-            ushort srcY,
-            sbyte srcZ,
-            ushort targetX,
-            ushort targetY,
-            sbyte targetZ,
-            byte speed,
-            int duration,
-            bool fixedDir,
-            bool doesExplode,
-            bool hasparticles,
-            GraphicEffectBlendMode blendmode
-        )
-        {
-            _effectManager.CreateEffect
-            (
-                type,
-                source,
-                target,
-                graphic,
-                hue,
-                srcX,
-                srcY,
-                srcZ,
-                targetX,
-                targetY,
-                targetZ,
-                speed,
-                duration,
-                fixedDir,
-                doesExplode,
-                hasparticles,
-                blendmode
-            );
-        }
-
         public static uint FindNearest(ScanTypeObject scanType)
         {
             int distance = int.MaxValue;
@@ -669,7 +584,6 @@ namespace ClassicUO.Game
 
             return serial;
         }
-
         public static uint FindNext(ScanTypeObject scanType, uint lastSerial, bool reverse)
         {
             bool found = false;
@@ -757,8 +671,6 @@ namespace ClassicUO.Game
 
             return 0;
         }
-
-
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)
@@ -805,7 +717,6 @@ namespace ClassicUO.Game
 
             SkillsRequested = false;
         }
-
         private static void InternalMapChangeClear(bool noplayer)
         {
             if (!noplayer)
@@ -860,6 +771,48 @@ namespace ClassicUO.Game
             }
 
             _toRemove.Clear();
+        }
+        public static void SpawnEffect
+     (
+         GraphicEffectType type,
+         uint source,
+         uint target,
+         ushort graphic,
+         ushort hue,
+         ushort srcX,
+         ushort srcY,
+         sbyte srcZ,
+         ushort targetX,
+         ushort targetY,
+         sbyte targetZ,
+         byte speed,
+         int duration,
+         bool fixedDir,
+         bool doesExplode,
+         bool hasparticles,
+         GraphicEffectBlendMode blendmode
+     )
+        {
+            _effectManager.CreateEffect
+            (
+                type,
+                source,
+                target,
+                graphic,
+                hue,
+                srcX,
+                srcY,
+                srcZ,
+                targetX,
+                targetY,
+                targetZ,
+                speed,
+                duration,
+                fixedDir,
+                doesExplode,
+                hasparticles,
+                blendmode
+            );
         }
     }
 }

@@ -984,6 +984,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to TileInfo.
+        /// </summary>
+        public static string TileInfo {
+            get {
+                return ResourceManager.GetString("TileInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Trade Skills.
         /// </summary>
         public static string TradeSkills {

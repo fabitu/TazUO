@@ -75,10 +75,10 @@ namespace ClassicUO.Configuration
         public static ProfileJsonContext DefaultToUse { get; } = new ProfileJsonContext(_jsonOptions.Value);
     }
 
-
-
     public sealed class Profile
     {
+        //EP: PROP EnableStaticFilter
+        public bool EnableStaticFilter { get; set; } = true;
         [JsonIgnore] public string Username { get; set; }
         [JsonIgnore] public string ServerName { get; set; }
         [JsonIgnore] public string CharacterName { get; set; }
@@ -330,7 +330,6 @@ namespace ClassicUO.Configuration
         public bool ShowJournalObjects { get; set; } = true;
         public bool ShowJournalSystem { get; set; } = true;
         public bool ShowJournalGuildAlly { get; set; } = true;
-
         public int WorldMapWidth { get; set; } = 400;
         public int WorldMapHeight { get; set; } = 400;
         public int WorldMapFont { get; set; } = 3;
@@ -568,7 +567,6 @@ namespace ClassicUO.Configuration
                     MessageType.System }
             }
         };
-
         public bool UseLastMovedCooldownPosition { get; set; } = false;
         public bool CloseHealthBarIfAnchored { get; set; } = false;
 
@@ -600,8 +598,6 @@ namespace ClassicUO.Configuration
         public bool ModernPaperdollAnchorEnabled { get; set; } = false;
         public bool JournalAnchorEnabled { get; set; } = false;
         public bool EnableGumpCloseAnimation { get; set; } = true;
-
-
         public void Save(string path, bool saveGumps = true)
         {
             Log.Trace($"Saving path:\t\t{path}");
@@ -615,7 +611,6 @@ namespace ClassicUO.Configuration
 
             Log.Trace("Saving done!");
         }
-
         private void SaveGumps(string path)
         {
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
@@ -691,7 +686,6 @@ namespace ClassicUO.Configuration
 
             SkillsGroupManager.Save();
         }
-
         private static void SaveItemsGumpRecursive(Item parent, XmlTextWriter xml, LinkedList<Gump> list)
         {
             if (parent != null && !parent.IsDestroyed && parent.Opened)
@@ -710,7 +704,6 @@ namespace ClassicUO.Configuration
                 }
             }
         }
-
         private static void SaveItemsGump(Item item, XmlTextWriter xml, LinkedList<Gump> list)
         {
             if (item != null && !item.IsDestroyed && item.Opened)
@@ -736,8 +729,6 @@ namespace ClassicUO.Configuration
                 }
             }
         }
-
-
         public List<Gump> ReadGumps(string path)
         {
             List<Gump> gumps = new List<Gump>();

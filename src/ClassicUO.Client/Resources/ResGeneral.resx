@@ -518,4 +518,7 @@ Ultima Online?</value>
   <data name="Czech" xml:space="preserve">
     <value>Czech</value>
   </data>
+  <data name="TileInfo" xml:space="preserve">
+    <value>TileInfo</value>
+  </data>
 </root>
