@@ -407,6 +407,7 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.UnRegisterAll();
             Weather.Reset();
+            SkillProgressBar.QueManager.Reset();
             UIManager.Clear();
             World.Clear();
             ChatManager.Clear();
