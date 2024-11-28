@@ -1336,16 +1336,16 @@ namespace ClassicUO.Game.Scenes
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
             //EP: Enable/Disable Static Filter
-            if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift)
+            if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift && e.repeat == 0) 
             {
                 ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
-                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
+                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);                                       
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
-            {
-                return;
-            }
+            //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
+            //{
+            //    return;
+            //}
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && TargetManager.IsTargeting)
             {
@@ -1372,15 +1372,15 @@ namespace ClassicUO.Game.Scenes
 
                     if (ProfileManager.CurrentProfile.HoldDownKeyTab)
                     {
-                        if (!_requestedWarMode)
-                        {
-                            _requestedWarMode = true;
+                        //if (!_requestedWarMode)
+                        //{
+                        //    _requestedWarMode = true;
 
-                            if (!World.Player.InWarMode)
-                            {
-                                NetClient.Socket.Send_ChangeWarMode(true);
-                            }
-                        }
+                        //    if (!World.Player.InWarMode)
+                        //    {
+                                NetClient.Socket.Send_ChangeWarMode(!World.Player.InWarMode);
+                          //  }
+                       // }
                     }
 
                     break;
@@ -1709,24 +1709,24 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            if (
-                e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB
-                && !ProfileManager.CurrentProfile.DisableTabBtn
-            )
-            {
-                if (ProfileManager.CurrentProfile.HoldDownKeyTab)
-                {
-                    if (_requestedWarMode)
-                    {
-                        NetClient.Socket.Send_ChangeWarMode(false);
-                        _requestedWarMode = false;
-                    }
-                }
-                else
-                {
-                    GameActions.ToggleWarMode();
-                }
-            }
+            //if (
+            //    e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB
+            //    && !ProfileManager.CurrentProfile.DisableTabBtn
+            //)
+            //{
+            //    if (ProfileManager.CurrentProfile.HoldDownKeyTab)
+            //    {
+            //        if (_requestedWarMode)
+            //        {
+            //            NetClient.Socket.Send_ChangeWarMode(false);
+            //            _requestedWarMode = false;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        GameActions.ToggleWarMode();
+            //    }
+            //}
 
             NameOverHeadManager.RegisterKeyUp(e.keysym);
         }
