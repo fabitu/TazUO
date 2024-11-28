@@ -47,9 +47,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool isLocked = false;
 
-        public Gump(uint local, uint server)
+        public Gump(uint serial, uint server)
         {
-            LocalSerial = local;
+            LocalSerial = serial;
             ServerSerial = server;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;

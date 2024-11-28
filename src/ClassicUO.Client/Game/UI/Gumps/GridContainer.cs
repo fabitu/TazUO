@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
         public bool SkipSave { get { return skipSave; } set { skipSave = value; } }
         #endregion
 
-        public GridContainer(uint local, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), local, 0)
+        public GridContainer(uint serial, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), serial, 0)
         {
             if (container == null)
             {
@@ -312,7 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (GridSaveSystem.Instance.UseOriginalContainerGump(LocalSerial) && (UseOldContainerStyle == null || UseOldContainerStyle == true))
             {
                 skipSave = true; //Avoid unsaving item slots because they have not be set up yet
-                OpenOldContainer(local);
+                OpenOldContainer(serial);
                 return;
             }
 

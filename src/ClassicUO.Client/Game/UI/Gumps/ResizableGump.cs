@@ -58,10 +58,10 @@ namespace ClassicUO.Game.UI.Gumps
             int height,
             int minW,
             int minH,
-            uint local,
+            uint serial,
             uint server,
             ushort borderHue = 0
-        ) : base(local, server)
+        ) : base(serial, server)
         {
             _borderControl = new BorderControl
             (

@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         const ushort LOCK_GRAPHIC = 0x082C;
 
-        protected AnchorableGump(uint local, uint server) : base(local, server) { }
+        protected AnchorableGump(uint serial, uint server) : base(serial, server) { }
 
         public ANCHOR_TYPE AnchorType { get; set; }
         public virtual int GroupMatrixWidth { get; protected set; }
