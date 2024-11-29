@@ -212,7 +212,7 @@ namespace ClassicUO.Game
         /// <returns>False if no status gump open</returns>
         public static bool CloseStatusBar()
         {
-            Gump g =             StatusGumpBase.GetStatusGump();
+            Gump g = StatusGumpBase.GetStatusGump();
             if (g != null)
             {
                 g.Dispose();
@@ -624,7 +624,14 @@ namespace ClassicUO.Game
             }
         }
 
-
+        public static void LogError(string message, ushort hue = 24, byte font = 2, bool unicode = true)
+        {
+            Print(message, hue, MessageType.Log, font, unicode);
+        }
+        public static void Log(string message, ushort hue = 946, byte font = 2, bool unicode = true)
+        {
+            Print(message, hue, MessageType.Log, font, unicode);
+        }
         public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
             if (type == MessageType.ChatSystem)
@@ -634,6 +641,22 @@ namespace ClassicUO.Game
                     null,
                     message,
                     "Chat",
+                    hue,
+                    type,
+                    font,
+                    TextType.OBJECT,
+                    unicode,
+                    Settings.GlobalSettings.Language
+                );
+                return;
+            }
+            if (type == MessageType.Log)
+            {
+                MessageManager.HandleMessage
+                (
+                    null,
+                    message,
+                    "Log",
                     hue,
                     type,
                     font,
@@ -738,6 +761,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
+            //EP:PickUp Amount
             if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
             {
                 if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
@@ -748,7 +772,7 @@ namespace ClassicUO.Game
                     {
                         return false;
                     }
-
+                    //EP: ADD Gump
                     gump = new SplitMenuGump(item, new Point(x, y))
                     {
                         X = Mouse.Position.X - 80,

@@ -414,8 +414,8 @@ namespace ClassicUO.Configuration
         public class TazUO
         {
             #region General
-            public string GridContainers { get; set; } = "Grid containers";
-            public string EnableGridContainers { get; set; } = "Enable grid containers";
+            public string GridContainer { get; set; } = "Grid containers";
+            public string EnableGridContainer { get; set; } = "Enable grid containers";
             public string GridContainerScale { get; set; } = "Grid container scale";
             public string AlsoScaleItems { get; set; } = "Also scale items";
             public string GridItemBorderOpacity { get; set; } = "Grid item border opacity";

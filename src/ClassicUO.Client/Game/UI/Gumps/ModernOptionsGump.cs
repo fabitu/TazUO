@@ -1959,17 +1959,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region General
             page = ((int)PAGE.TUOOptions + 1000);
-            content.AddToLeft(SubCategoryButton(lang.GetTazUO.GridContainers, page, content.LeftWidth));
-            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.EnableGridContainers, 0, profile.UseGridLayoutContainerGumps, (b) =>
+            content.AddToLeft(SubCategoryButton(lang.GetTazUO.GridContainer, page, content.LeftWidth));
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.EnableGridContainer, 0, profile.UseGridLayoutContainerGumps, (b) =>
             {
                 profile.UseGridLayoutContainerGumps = b;
             }), true, page);
 
             content.BlankLine();
 
-            content.AddToRight(new SliderWithLabel(lang.GetTazUO.GridContainerScale, 0, Theme.SLIDER_WIDTH, 50, 200, profile.GridContainersScale, (i) =>
+            content.AddToRight(new SliderWithLabel(lang.GetTazUO.GridContainerScale, 0, Theme.SLIDER_WIDTH, 50, 200, profile.GridContainerScale, (i) =>
             {
-                profile.GridContainersScale = (byte)i;
+                profile.GridContainerScale = (byte)i;
             }), true, page);
             content.Indent();
             content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.AlsoScaleItems, 0, profile.GridContainerScaleItems, (b) =>
@@ -1996,18 +1996,18 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.ContainerOpacity, 0, Theme.SLIDER_WIDTH, 0, 100, profile.ContainerOpacity, (i) =>
             {
                 profile.ContainerOpacity = (byte)i;
-                GridContainer.UpdateAllGridContainers();
+                GridContainer.UpdateAllGridContainer();
             }), true, page);
             content.Indent();
             content.AddToRight(new ModernColorPickerWithLabel(lang.GetTazUO.BackgroundColor, profile.AltGridContainerBackgroundHue, (h) =>
             {
                 profile.AltGridContainerBackgroundHue = h;
-                GridContainer.UpdateAllGridContainers();
+                GridContainer.UpdateAllGridContainer();
             }), true, page);
             content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.UseContainersHue, 0, profile.Grid_UseContainerHue, (b) =>
             {
                 profile.Grid_UseContainerHue = b;
-                GridContainer.UpdateAllGridContainers();
+                GridContainer.UpdateAllGridContainer();
             }), true, page);
             content.RemoveIndent();
 
@@ -2029,7 +2029,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.MakeAnchorable, 0, profile.EnableGridContainerAnchor, (b) =>
             {
                 profile.EnableGridContainerAnchor = b;
-                GridContainer.UpdateAllGridContainers();
+                GridContainer.UpdateAllGridContainer();
             }), true, page);
             c.SetTooltip(lang.GetTazUO.TooltipGridAnchor);
 
@@ -2038,7 +2038,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new ComboBoxWithLabel(lang.GetTazUO.ContainerStyle, 0, Theme.COMBO_BOX_WIDTH, Enum.GetNames(typeof(GridContainer.BorderStyle)), profile.Grid_BorderStyle, (i, s) =>
             {
                 profile.Grid_BorderStyle = i;
-                GridContainer.UpdateAllGridContainers();
+                GridContainer.UpdateAllGridContainer();
             }), true, page);
 
             content.BlankLine();
@@ -2046,7 +2046,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(c = new CheckboxWithLabel(lang.GetTazUO.HideBorders, 0, profile.Grid_HideBorder, (b) =>
             {
                 profile.Grid_HideBorder = b;
-                GridContainer.UpdateAllGridContainers();
+                GridContainer.UpdateAllGridContainer();
             }), true, page);
 
             content.BlankLine();

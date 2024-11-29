@@ -6,6 +6,7 @@ namespace ClassicUO.Game.UI.Controls
     public class ResizableStaticPic : Control
     {
         private uint graphic;
+        public bool Visible { get; set; }
         private ushort hue = 0;
         private Vector3 hueVector { get; set; } = ShaderHueTranslator.GetHueVector(0, false, 1);
 
@@ -30,6 +31,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (!Visible)
+                return false;
             base.Draw(batcher, x, y);
 
             if (IsDisposed)

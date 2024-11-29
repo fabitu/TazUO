@@ -379,7 +379,7 @@ namespace ClassicUO.Configuration
         public bool EnableGridContainerAnchor { get; set; } = false;
         public byte GridBorderAlpha { get; set; } = 75;
         public ushort GridBorderHue { get; set; } = 0;
-        public byte GridContainersScale { get; set; } = 100;
+        public byte GridContainerScale { get; set; } = 100;
         public bool GridContainerScaleItems { get; set; } = true;
         public bool GridEnableContPreview { get; set; } = true;
         public int Grid_BorderStyle { get; set; } = 0;
@@ -461,6 +461,8 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))] public Point StatusGumpPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridPosition { get; set; } = new Point(100, 100);
         [JsonConverter(typeof(Point2Converter))] public Point BackpackGridSize { get; set; } = new Point(300, 300);
+        [JsonConverter(typeof(Point2Converter))] public Point DefaultGridSize { get; set; } = new Point(300, 300);
+        [JsonConverter(typeof(Point2Converter))] public Point DefaultCorpseGridSize { get; set; } = new Point(400, 400);
         public bool WorldMapLocked { get; set; } = false;
         public bool PaperdollLocked { get; set; } = false;
         public bool JournalLocked { get; set; } = false;
@@ -531,7 +533,7 @@ namespace ClassicUO.Configuration
         public static uint GumpsVersion { get; private set; }
 
         [JsonConverter(typeof(Point2Converter))]
-        public Point InfoBarSize { get; set; } = new Point(400, 20);
+        public Point InfoBarSize { get; set; } = new Point(1600, 40);
         public bool InfoBarLocked { get; set; } = false;
         public string InfoBarFont { get; set; } = "Roboto-Regular";
         public int InfoBarFontSize { get; set; } = 18;
@@ -565,6 +567,10 @@ namespace ClassicUO.Configuration
             {
                 "System", new MessageType[] {
                     MessageType.System }
+            },
+            {
+                "Log", new MessageType[] {
+                    MessageType.Log }
             }
         };
         public bool UseLastMovedCooldownPosition { get; set; } = false;

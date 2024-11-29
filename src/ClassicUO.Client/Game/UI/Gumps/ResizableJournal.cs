@@ -104,9 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_background);
             Add(_backgroundTexture);
             Add(_scrollBarBase);
-
             Add(_journalArea);
-
             Add(_newTabButton = new NiceButton(0, 0, 20, TAB_HEIGHT, ButtonAction.Activate, "+") { IsSelectable = false });
             _newTabButton.SetTooltip("Add a new tab");
             _newTabButton.MouseUp += (s, e) =>

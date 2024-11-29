@@ -30,21 +30,21 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Linq;
-using ClassicUO.IO.Audio;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.IO.Audio;
+using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
 using MathHelper = ClassicUO.Utility.MathHelper;
-using ClassicUO.Configuration;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Utility.Logging;
-using ClassicUO.Assets;
 
 namespace ClassicUO.Game
 {

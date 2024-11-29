@@ -30,10 +30,7 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -41,15 +38,18 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -3865,7 +3865,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gridSection.AddRight(_gridContainerScale = AddHSlider(
                             null,
                             50, 200,
-                            _currentProfile.GridContainersScale,
+                            _currentProfile.GridContainerScale,
                             0, 0,
                             200
                         ));
@@ -5249,7 +5249,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.DisableSystemChat = _disableSystemChat.IsChecked;
             _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
             _currentProfile.GridBorderHue = _gridBorderHue.Hue;
-            _currentProfile.GridContainersScale = (byte)_gridContainerScale.Value;
+            _currentProfile.GridContainerScale = (byte)_gridContainerScale.Value;
             _currentProfile.NamePlateHealthBar = _namePlateHealthBar.IsChecked;
             _currentProfile.NamePlateOpacity = (byte)_namePlateOpacity.Value;
             _currentProfile.NamePlateBorderOpacity = (byte)_nameplateBorderOpacity.Value;

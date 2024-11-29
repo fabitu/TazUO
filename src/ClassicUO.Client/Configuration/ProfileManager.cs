@@ -57,6 +57,7 @@ namespace ClassicUO.Configuration
             string fileToLoad = Path.Combine(path, "profile.json");
 
             ProfilePath = path;
+            //EP: Load Profile File
             CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse) ?? new Profile();
 
             CurrentProfile.Username = username;

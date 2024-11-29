@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Managers
                 return true;
             }
 
-            name = data = null;
+            name = data = string.Empty;
 
             return false;
         }
