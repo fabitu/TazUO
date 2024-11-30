@@ -6,8 +6,10 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Xml;
 using Point = Microsoft.Xna.Framework.Point;
@@ -149,7 +151,6 @@ namespace ClassicUO.Game.UI.Gumps
             Style6,
             Style7,
             Style8,
-            //Style9
         }
 
         private void BuildTabs()
@@ -213,22 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
                             graphic = 83;
                         borderSize = 16;
                         break;
-                    }
-                //case BorderStyle.Style9:
-                //    {
-                //        if (Assets.GumpsLoader.Instance.GetGumpTexture(40313, out var bounds) != null)
-                //        {
-                //            graphic = 40313;
-                //            borderSize = 75;
-                //        }
-                //        else
-                //        {
-                //            graphic = 83;
-                //            borderSize = 16;
-                //        }
-                //        break;
-                //    }
-
+                    }            
                 default:
                 case BorderStyle.Default:
                     BorderControl.DefaultGraphics();
@@ -393,9 +379,23 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     nb.ContextMenu.Show();
                 }
+                if (e.Button == MouseButtonType.Middle)
+                {
+                    ClearLog(MessageType.Log);                   
+                }
             };
             _tabName.Add(Name);
             _tabTypes.Add(filters);
+        }
+
+        private void ClearLog(MessageType messageType)
+        {
+            _journalArea.ClearJournalDatas(messageType);           
+            for (int i = 0; i < JournalManager.Entries.Count; i++)
+            {
+                if (JournalManager.Entries[i].MessageType == MessageType.Log)
+                    JournalManager.Entries.Remove(JournalManager.Entries[i]);
+            }
         }
 
         private void AddJournalEntry(JournalEntry journalEntry)
@@ -456,7 +456,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private Deque<JournalData> journalDatas = new Deque<JournalData>();
 
-
             private readonly ScrollBarBase _scrollBar;
             private int lastWidth = 0, lastHeight = 0;
             private ResizableJournal _resizableJournal;
@@ -476,7 +475,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 WantUpdateSize = false;
             }
-
+            public void ClearJournalDatas(MessageType messageType)
+            {               
+                for (int i = journalDatas.Count-1; i >= 0; i--)
+                {                    
+                    if(journalDatas[i].MessageType == MessageType.Log)
+                    journalDatas.Remove(journalDatas[i]);
+                }               
+            }
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
@@ -528,7 +534,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     CalculateScrollBarMaxValue();
                 }
-
             }
 
             public void CalculateScrollBarMaxValue()
@@ -542,7 +547,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (CanBeDrawn(_.TextType, _.MessageType))
                             height += _.EntryText.Height;
                 }
-
 
                 height -= _scrollBar.Height;
 
@@ -708,6 +712,9 @@ namespace ClassicUO.Game.UI.Gumps
                             case MessageType.Party:
                                 entryName = "Party";
                                 break;
+                            case MessageType.Log:
+                                entryName = "Log";
+                                break;
                         }
 
                         Add(entryName,
@@ -747,7 +754,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                     }));
-                });
+                });           
             }
 
             private static MessageType[] RemoveType(MessageType[] array, MessageType removeMe)

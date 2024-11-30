@@ -126,6 +126,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.Update();
+            if (InvalidateContents)
+            {
+                AfterBaseUpdate();
+            }
+        }
+        public virtual void AfterBaseUpdate()
+        {
+            
         }
 
         public override void Dispose()

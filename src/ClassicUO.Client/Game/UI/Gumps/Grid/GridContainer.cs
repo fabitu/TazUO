@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         #endregion
 
         #region private vars
-        private Item container { get { return World.Items.Get(LocalSerial); } }
+        public Item container { get { return World.Items.Get(LocalSerial); } }
         private float lastGridItemScale = ProfileManager.CurrentProfile.GridContainerScale / 100f;
         private int lastWidth = GetWidth(), lastHeight = GetHeight();
         private bool quickLootThisContainer = false;
@@ -107,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
-
+            GridContainerManager.AddContainer(this);
             #region SET VARS
             isCorpse = container.IsCorpse || container.Graphic == 0x0009;
             if (useGridStyle != null)
@@ -511,7 +512,7 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void UpdateItems(bool overrideSort = false)
+        public void UpdateItems(bool overrideSort = false)
         {
             //Container doesn't exist or has no items
             if (container == null)
@@ -525,7 +526,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             List<Item> sortedContents = ProfileManager.CurrentProfile is null || ProfileManager.CurrentProfile.GridContainerSearchMode == 0 ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
             gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
-
             InvalidateContents = false;
         }
 
@@ -536,6 +536,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
                 UpdateItems();
+                GridContainerManager.UpdateAllContainers();
             }
             if (!firstItemsLoaded)
             {
@@ -545,7 +546,7 @@ namespace ClassicUO.Game.UI.Gumps
                     AutoLootManager.Instance.HandleCorpse(container);
                 }
             }
-        }
+        }      
 
         protected override void OnMouseExit(int x, int y)
         {
@@ -597,7 +598,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container != null && gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(container, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle, autoSortContainer);
-
+            GridContainerManager.RemoveContainer(this);
             base.Dispose();
         }
 
@@ -846,7 +847,6 @@ namespace ClassicUO.Game.UI.Gumps
                     ItemPositions.Add(item.Slot, item.Serial);
                     if (item.IsLocked)
                         itemLocks.Add(item.Serial);
-
                 }
                 container = World.Items.Get(thisContainer);
                 UpdateItems();
@@ -1074,6 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps
                             ItemPropertiesData itemData = new ItemPropertiesData(item.Value.SlotItem);
 
                             if (itemData.HasData)
+                            {
                                 foreach (GridHighlightData configData in highlightConfigs) //For each highlight configuration
                                 {
                                     bool fullMatch = true;
@@ -1098,6 +1099,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     }
                                     if (fullMatch) item.Value.SetHighLightBorder(configData.Hue);
                                 }
+                            }
+                            //EP: TODO: Adicionar filter by name colocar a cor do fundo diferente baseado no nome (preferencia de loot manual)
+                            
                         }
                     }
                 });
@@ -1125,9 +1129,7 @@ namespace ClassicUO.Game.UI.Gumps
             public bool Hightlight = false;
             public bool SelectHighlight = false;
             public Item SlotItem { get { return _item; } set { _item = value; LocalSerial = value.Serial; } }
-
             private readonly int[] spellbooks = { 0x0EFA, 0x2253, 0x2252, 0x238C, 0x23A0, 0x2D50, 0x2D9D, 0x225A };
-
             public GridItem(uint serial, int size, Item _container, GridContainer gridContainer, int count)
             {
                 #region VARS
@@ -1163,13 +1165,11 @@ namespace ClassicUO.Game.UI.Gumps
                 hit.MouseUp += _hit_MouseUp;
                 hit.MouseDoubleClick += _hit_MouseDoubleClick;
             }
-
             public void SetHighLightBorder(ushort hue)
             {
                 borderHighlight = hue == 0 ? false : true;
                 borderHighlightHue = hue;
             }
-
             public void Resize()
             {
                 Width = gridItemSize;
@@ -1179,11 +1179,6 @@ namespace ClassicUO.Game.UI.Gumps
                 background.Width = gridItemSize;
                 background.Height = gridItemSize;
             }
-
-            /// <summary>
-            /// Set this grid slot's item. Set to null for empty slot.
-            /// </summary>
-            /// <param name="item"></param>
             public void SetGridItem(Item item)
             {
                 if (item == null)
@@ -1262,9 +1257,8 @@ namespace ClassicUO.Game.UI.Gumps
                     hit.SetTooltip(_item);
                 }
             }
-
             private ushort GetHue(double stones)
-            {
+            {               
                 var percent = ((World.Player.Weight + stones) / World.Player.WeightMax) * 100;
                 if (percent < 50) //green
                     return 68;
@@ -1274,7 +1268,6 @@ namespace ClassicUO.Game.UI.Gumps
                     return 44;
                 return 38; //red
             }
-
             private Tuple<int, double> MatchCountAndStones(string text)
             {
                 // Regex pattern to extract the numbers
@@ -1296,7 +1289,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 return new Tuple<int, double>(0, 0.00);
             }
-
             private string ReadProperties(uint serial, out string htmltext)
             {
                 bool hasStartColor = false;
@@ -1524,7 +1516,7 @@ namespace ClassicUO.Game.UI.Gumps
             private Rectangle bounds;
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
+            {                
                 if (_item != null && _item.ItemData.Layer > 0 && hit.MouseIsOver && Keyboard.Ctrl && (toolTipThis == null || toolTipThis.IsDisposed) && (toolTipitem1 == null || toolTipitem1.IsDisposed) && (toolTipitem2 == null || toolTipitem2.IsDisposed))
                 {
                     Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
@@ -2037,6 +2029,30 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
+    }
+
+    public static class GridContainerManager
+    {
+        private static ConcurrentBag<GridContainer> OpenedContainers = [];
+
+        public static void AddContainer(GridContainer container)
+        {
+            OpenedContainers.Add(container);
+        }
+        public static void RemoveContainer(GridContainer container)
+        {
+            OpenedContainers.TryTake(out GridContainer _);
+        }
+
+        public static void UpdateAllContainers()
+        {            
+            Parallel.ForEach(OpenedContainers, (x) =>
+            {
+                GameActions.Log($"Atualizando {x.container.Name}");
+                x.UpdateItems();
+            });
+        }
+
     }
     public class GridContainerPreview : Gump
     {

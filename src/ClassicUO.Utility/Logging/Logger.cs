@@ -81,7 +81,7 @@ namespace ClassicUO.Utility.Logging
         }
 
         public void Message(LogTypes logType, string text)
-        {
+        {            
             lock (_syncObject)
             {
                 SetLogger(logType, text);

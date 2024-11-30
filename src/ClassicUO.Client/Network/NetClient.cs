@@ -30,10 +30,12 @@
 
 #endregion
 
+using ClassicUO.Game;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
@@ -50,10 +52,14 @@ namespace ClassicUO.Network
 
         public event EventHandler OnConnected, OnDisconnected;
         public event EventHandler<SocketError> OnError;
+        string _ip; int _port;
+        int triesCount = 0;
 
 
         public void Connect(string ip, int port)
         {
+            _ip = ip;
+            _port = port;
             if (IsConnected) return;
 
             _socket = new TcpClient();
@@ -80,14 +86,43 @@ namespace ClassicUO.Network
             {
                 Log.Error($"error while connecting {ex}");
                 OnError?.Invoke(this, SocketError.SocketError);
-            }  
+            }
+        }
+        private void Recconect(string ip, int port)
+        {
+            Connect(ip, port);
         }
 
         public void Send(byte[] buffer, int offset, int count)
         {
-            var stream = _socket.GetStream();
-            stream.Write(buffer, offset, count);
-            stream.Flush();
+            try
+            {
+                var stream = _socket.GetStream();
+                stream.Write(buffer, offset, count);
+                stream.Flush();
+            }
+            catch (Exception ex)
+            {
+                GameActions.LogError(ex.Message);
+                if (triesCount <= 5)
+                {
+                    triesCount++;
+                    if (!IsConnected)
+                    {
+                        GameActions.LogError("Reconnect");
+                        Recconect(_ip, _port);
+                    }
+                    if (IsConnected)
+                    {
+                        GameActions.LogError("IsConnected");
+                        Send(buffer, offset, count);
+                    }
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         public int Read(byte[] buffer)
@@ -103,7 +138,7 @@ namespace ClassicUO.Network
             {
                 var toRead = Math.Min(buffer.Length, available - done);
                 var read = stream.Read(buffer, done, toRead);
-                
+
                 if (read <= 0)
                 {
                     OnDisconnected?.Invoke(this, EventArgs.Empty);
@@ -150,7 +185,7 @@ namespace ClassicUO.Network
             _sendStream = new CircularBuffer();
 
             _socket = new SocketWrapper();
-            _socket.OnConnected += (o, e) => 
+            _socket.OnConnected += (o, e) =>
             {
                 Statistics.Reset();
                 Connected?.Invoke(this, EventArgs.Empty);
@@ -161,10 +196,10 @@ namespace ClassicUO.Network
 
 
         public static NetClient Socket { get; set; } = new NetClient();
-       
+
 
         public bool IsConnected => _socket != null && _socket.IsConnected;
-            
+
         public NetStatistics Statistics { get; }
 
         public uint LocalIP
@@ -355,7 +390,7 @@ namespace ClassicUO.Network
                 {
                     Log.Error("main exception:\n" + ex);
                     Log.Error("socket error when sending:\n" + socketEx);
-                   
+
                     Disconnect();
                     Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }

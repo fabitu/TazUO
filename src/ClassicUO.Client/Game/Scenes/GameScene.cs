@@ -480,6 +480,7 @@ namespace ClassicUO.Game.Scenes
                             else
                             {
                                 NetClient.Socket.Disconnect();
+                                JournalManager.Entries.Clear();
                                 Client.Game.SetScene(new LoginScene());
                             }
                         }

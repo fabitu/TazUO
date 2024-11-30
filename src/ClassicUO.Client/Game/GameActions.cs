@@ -624,7 +624,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void LogError(string message, ushort hue = 24, byte font = 2, bool unicode = true)
+        public static void LogError(string message, ushort hue = 38, byte font = 2, bool unicode = true)
         {
             Print(message, hue, MessageType.Log, font, unicode);
         }
