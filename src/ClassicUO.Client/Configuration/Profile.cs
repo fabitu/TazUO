@@ -330,6 +330,7 @@ namespace ClassicUO.Configuration
         public bool ShowJournalObjects { get; set; } = true;
         public bool ShowJournalSystem { get; set; } = true;
         public bool ShowJournalGuildAlly { get; set; } = true;
+        public bool ShowJournalLog { get; set; } = true;
         public int WorldMapWidth { get; set; } = 400;
         public int WorldMapHeight { get; set; } = 400;
         public int WorldMapFont { get; set; } = 3;

@@ -6,9 +6,11 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.Lights;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -1113,6 +1115,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly int slot;
             private GridContainerPreview preview;
             Label count;
+            Label weight;
             AlphaBlendControl background;
             private CustomToolTip toolTipThis, toolTipitem1, toolTipitem2;
 
@@ -1205,12 +1208,13 @@ namespace ClassicUO.Game.UI.Gumps
                     LocalSerial = item.Serial;
                     //EP: Set Stackable count
                     int itemAmt = 0;
+                    double stones = 0;
                     if (_item.ItemData.IsStackable)
                     {
                         itemAmt = item.Amount;
                     }
                     //EP: Set Container inside count
-                    else if (_item.ItemData.IsContainer)
+                    if (_item.ItemData.IsStackable || _item.ItemData.IsContainer)
                     {
                         string rawProp = ReadProperties(_item.Serial, out string htmlText);
                         //GameActions.Log($"Serial{_item.Serial} Prop:{rawProp}  ");                        
@@ -1219,11 +1223,13 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             foreach (var propLine in prop)
                             {
-                                var tItens = MatchData(propLine);
-                                if (tItens.Item1 > -1)
+                                var tItens = MatchCountAndStones(propLine);
+                                if (_item.ItemData.IsContainer)
                                     itemAmt = tItens.Item1;
+                                stones = tItens.Item2;
                             }
-                        }
+                        }                    
+                        
                         //else
                         //{
                         //    GameActions.LogError($"Serial{_item.Serial} Prop: Is Null");
@@ -1234,19 +1240,42 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_item.ItemData.IsStackable && itemAmt > 1 || _item.ItemData.IsContainer && itemAmt > 0)
                     {
                         count?.Dispose();
-                        count = new Label(itemAmt.ToString(), true, 0x0481, align: TEXT_ALIGN_TYPE.TS_LEFT)
+                        count = new Label(itemAmt.ToString(), true, 0x0481)
                         {
                             X = 1
                         };
                         count.Y = Height - count.Height;
                     }
+                    if ((_item.ItemData.IsStackable || _item.ItemData.IsContainer) && stones != 0.00)
+                    {
+                        var hue = GetHue(stones);
+                        weight?.Dispose();
+                        weight = new Label(stones.ToString(), true, hue)
+                        {
+                            Y = 1,
+                            X = 1
+                        };
+                    }
+
                     if (MultiItemMoveGump.MoveItems.Contains(_item))
                         Hightlight = true;
                     hit.SetTooltip(_item);
                 }
             }
 
-            private Tuple<int, double> MatchData(string text)
+            private ushort GetHue(double stones)
+            {
+                var percent = ((World.Player.Weight + stones) / World.Player.WeightMax) * 100;
+                if (percent < 50) //green
+                    return 68;
+                else if (percent < 70) //yelow
+                    return 54;
+                else if (percent < 99) //orange
+                    return 44;
+                return 38; //red
+            }
+
+            private Tuple<int, double> MatchCountAndStones(string text)
             {
                 // Regex pattern to extract the numbers
                 string pattern = @"(\d+)\s?(Items?|Item),\s?(\d+\.\d+|\d+)\s?(Stones?|Stone)";
@@ -1263,10 +1292,9 @@ namespace ClassicUO.Game.UI.Gumps
                     var itemsNumber = Convert.ToInt32(match.Groups[1].Value);   // Number for Items
                     float.TryParse(match.Groups[3].Value, out float stonesNumber);  // Number for Stones
                                                                                     // 
-                    return new Tuple<int, double>(itemsNumber, stonesNumber);
+                    return new Tuple<int, double>(itemsNumber, Math.Round(stonesNumber, 1));
                 }
                 return new Tuple<int, double>(0, 0.00);
-
             }
 
             private string ReadProperties(uint serial, out string htmltext)
@@ -1325,7 +1353,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
-                return string.IsNullOrEmpty(result) ? null : result;
+                return string.IsNullOrEmpty(result) ? string.Empty : result;
             }
             private void _hit_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
             {
@@ -1689,6 +1717,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector
                     );
                     count?.Draw(batcher, x + count.X, y + count.Y);
+                    weight?.Draw(batcher, x + weight.X, y + weight.Y);
                 }
                 return true;
             }

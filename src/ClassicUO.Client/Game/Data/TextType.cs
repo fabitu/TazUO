@@ -37,6 +37,7 @@ namespace ClassicUO.Game.Data
         CLIENT,
         SYSTEM,
         OBJECT,
-        GUILD_ALLY
+        GUILD_ALLY,
+        LOG
     }
 }

@@ -215,6 +215,10 @@ namespace ClassicUO.Game.UI.Gumps
                             ProfileManager.CurrentProfile.ShowJournalGuildAlly = c.IsChecked;
 
                             break;
+                        case TextType.LOG:
+                            ProfileManager.CurrentProfile.ShowJournalLog = c.IsChecked;
+
+                            break;
                     }
                 }
             }

@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI
                     }
                 }
             }
-            return string.IsNullOrEmpty(result) ? null : result;
+            return string.IsNullOrEmpty(result) ? string.Empty : result;
         }
 
         public void SetText(string text, int maxWidth = 0)
