@@ -53,8 +53,10 @@ namespace ClassicUO
         public static ClientFlags Protocol { get; set; }
         public static string ClientPath { get; private set; }
         public static GameController Game { get; private set; }
-
-
+        public static void LoadTileData()
+        {
+            StaticFilters.Load();
+        }
         public static void Run()
         {
             Debug.Assert(Game == null);
@@ -186,7 +188,7 @@ namespace ClassicUO
 
             // ok now load uo files
             UOFileManager.Load(Version, Settings.GlobalSettings.UltimaOnlineDirectory, Settings.GlobalSettings.UseVerdata, Settings.GlobalSettings.Language);
-            StaticFilters.Load();
+            //StaticFilters.Load();
 
             BuffTable.Load();
             ChairTable.Load();

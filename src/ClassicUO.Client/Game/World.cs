@@ -147,14 +147,13 @@ namespace ClassicUO.Game
             if (ProfileManager.CurrentProfile == null)
             {
                 string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
-                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);
+                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);                
             }
-
+            StaticFilters.Load(true);
             if (Player != null)
             {
                 Clear();
-            }
-
+            }           
             Player = new PlayerMobile(serial);
             Mobiles.Add(Player);
 

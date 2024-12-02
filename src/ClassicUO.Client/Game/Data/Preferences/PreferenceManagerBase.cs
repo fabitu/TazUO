@@ -1,4 +1,6 @@
-﻿using ClassicUO.Utility.Logging;
+﻿using ClassicUO.Configuration;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,23 +10,26 @@ using static ClassicUO.Game.Data.StaticFilters;
 
 namespace ClassicUO.Game.Data.Preferences
 {
-    internal class PreferenceManager
+    internal abstract class PreferenceManagerBase
     {
-        private readonly string filePath;
-        private readonly ushort _replaceItem;
+        protected readonly string filePath;
+        protected ushort defaultReplaceGraphic;
+        protected List<ushort> defaultReplaceGraphicList;
+        protected List<StaticCustomItens> staticCustomItens;
 
-        public PreferenceManager(string fileName, ushort replaceItem)
+        public PreferenceManagerBase(string fileName)
         {
             filePath = Path.Combine(DirectoryPath, fileName);
-            _replaceItem = replaceItem;
+            staticCustomItens = LoadFile();
         }
+
         public List<StaticCustomItens> LoadFile()
         {
             return ReadFile();
         }
 
         public List<StaticCustomItens> AddPreference(StaticCustomItens addItem)
-        {            
+        {
             try
             {
                 var customItens = ReadFile();
@@ -90,8 +95,8 @@ namespace ClassicUO.Game.Data.Preferences
             replaceItem.Add(new StaticCustomItens()
             {
                 Description = "Default",
-                ReplaceToGraphic = _replaceItem,
-                ToReplaceGraphicArray = []
+                ReplaceToGraphic = defaultReplaceGraphic,
+                ToReplaceGraphicArray = defaultReplaceGraphicList
             });
 
             var jsonString = JsonSerializer.Serialize(replaceItem);

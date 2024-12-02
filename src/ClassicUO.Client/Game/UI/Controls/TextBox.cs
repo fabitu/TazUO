@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -286,14 +286,28 @@ namespace ClassicUO.Game.UI.Controls
             return finalString;
         }
 
-        public static string ConvertHtmlToFontStashSharpCommand(string text)
+        public static string ConvertHTMLColorsToString(string text)
         {
             string finalString;
 
             if (string.IsNullOrEmpty(text))
                 return "";
 
-            finalString = ConvertHTMLColorsToFSS(text);
+            finalString = Regex.Replace(text, "<basefont color=\"?'?(?<color>.*?)\"?'?>", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            finalString = Regex.Replace(finalString, "<Bodytextcolor\"?'?(?<color>.*?)\"?'?>", "", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            finalString = finalString.Replace("</basefont>", "\n").Replace("</BASEFONT>", "\n");
+
+            return finalString;
+        }
+
+        public static string ConvertHtmlToFontStashSharpCommand(string text, bool toRawText = false)
+        {
+            string finalString;
+
+            if (string.IsNullOrEmpty(text))
+                return "";
+
+            finalString = toRawText ? ConvertHTMLColorsToString(text) : ConvertHTMLColorsToFSS(text);
 
             finalString = finalString.Replace("<br>", "\n").Replace("<BR>", "\n");
             finalString = finalString.Replace("<left>", "").Replace("</left>", "");

@@ -72,13 +72,13 @@ namespace ClassicUO.Game.Data
         }
         static string _directoryPath;
 
-        public static void Load()
+        public static void Load(bool useProfile = false)
         {
             LoadCaveTiles();
             LoadVegetationTiles();
             LoadTreesTiles();
-            WallTiles = new PreferenceManager("wall.json", Constants.WALL_REPLACE_GRAPHIC).LoadFile();
-            Doors = new PreferenceManager("doors.json", Constants.WALL_REPLACE_GRAPHIC).LoadFile();            
+            WallTiles = new PreferenceWallManager().LoadFile();
+            Doors = new PreferenceDoorMannager().LoadFile();
         }
 
         private static string EnsureDirectoryPath()

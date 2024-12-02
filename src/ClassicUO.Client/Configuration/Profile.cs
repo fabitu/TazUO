@@ -77,8 +77,15 @@ namespace ClassicUO.Configuration
 
     public sealed class Profile
     {
+
         //EP: PROP EnableStaticFilter
         public bool EnableStaticFilter { get; set; } = true;
+
+        public ushort DefaultDoorGraphic { get; set; } = 0x0066;
+        public ushort DefaultWallGraphic { get; set; } = 0x0066;
+        public ushort DefaultTreeStumpGraphic { get; set; } = 0x0E58;
+        public ushort DefaultTreeGraphic { get; set; } = 0x0E59;
+
         [JsonIgnore] public string Username { get; set; }
         [JsonIgnore] public string ServerName { get; set; }
         [JsonIgnore] public string CharacterName { get; set; }

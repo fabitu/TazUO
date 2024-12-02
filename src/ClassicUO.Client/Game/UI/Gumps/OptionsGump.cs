@@ -5069,7 +5069,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void Apply()
+        public void Apply()
         {
             WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
 

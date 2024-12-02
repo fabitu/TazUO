@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static ClassicUO.Game.UI.Gumps.OptionsGump;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -128,13 +129,11 @@ namespace ClassicUO.Game.UI.Gumps
             area.Add(_name = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 120, 20) { X = 25, Y = y, AcceptKeyboardInput = true });
             _name.SetText(data.Name);
 
-            _name.TextChanged += (s, e) =>
+            _name.FocusLost += (s, e) =>
             {
                 Task.Factory.StartNew(() =>
                 {
-                    var tVal = _name.Text;
-                    System.Threading.Thread.Sleep(2500);
-                    if (_name.Text == tVal)
+                    if (!string.IsNullOrEmpty(_name.Text))
                     {
                         data.Name = _name.Text;
                         data.Save();
@@ -408,24 +407,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             private void AddProperty(int subKeyLoc)
-            {
+            { 
                 while (data.Properties.Count <= subKeyLoc)
                 {
                     data.Properties.Add("");
                     data.PropMinVal.Add(-1);
-
                 }
                 data.Save();
                 InputField propInput, valInput;
                 scrollArea.Add(propInput = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 150, 20) { Y = lastYitem });
                 propInput.SetText(data.Properties[subKeyLoc]);
-                propInput.TextChanged += (s, e) =>
+                propInput.FocusLost += (s, e) =>
                 {
                     Task.Factory.StartNew(() =>
-                    {
-                        var tVal = propInput.Text;
-                        System.Threading.Thread.Sleep(2500);
-                        if (propInput.Text == tVal)
+                    {                        
+                        if (!string.IsNullOrEmpty(propInput.Text))
                         {
                             data.Properties[subKeyLoc] = propInput.Text;
                             data.Save();

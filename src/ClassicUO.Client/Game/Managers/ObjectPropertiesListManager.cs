@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Managers
         public readonly Item item, itemComparedTo;
         public List<SinglePropertyData> singlePropertyData = new List<SinglePropertyData>();
 
-        public ItemPropertiesData(Item item, Item compareTo = null)
+        public ItemPropertiesData(Item item, Item compareTo = null,bool rawText = false)
         {
             if (item == null)
                 return;
@@ -181,7 +181,7 @@ namespace ClassicUO.Game.Managers
             {
                 Name = Name.Trim();
                 HasData = true;
-                processData();
+                processData(rawText);
             }
         }
 
@@ -199,12 +199,14 @@ namespace ClassicUO.Game.Managers
                 Name = tooltip;
             }
             HasData = true;
-            processData();
+            processData(false);
         }
 
-        private void processData()
+        private void processData(bool toRawText)
         {
-            string formattedData = TextBox.ConvertHtmlToFontStashSharpCommand(RawData);
+            
+            
+            string formattedData = TextBox.ConvertHtmlToFontStashSharpCommand(RawData, toRawText);
 
             RawLines = formattedData.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
 
@@ -213,7 +215,7 @@ namespace ClassicUO.Game.Managers
                 singlePropertyData.Add(new SinglePropertyData(line));
             }
 
-            if(itemComparedTo != null)
+            if (itemComparedTo != null)
             {
                 GenComparisonData();
             }
@@ -221,7 +223,7 @@ namespace ClassicUO.Game.Managers
 
         private void GenComparisonData()
         {
-            if(itemComparedTo == null) return;
+            if (itemComparedTo == null) return;
 
             ItemPropertiesData itemPropertiesData = new ItemPropertiesData(itemComparedTo);
             if (itemPropertiesData.HasData)

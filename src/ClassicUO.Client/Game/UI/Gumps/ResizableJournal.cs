@@ -665,57 +665,7 @@ namespace ClassicUO.Game.UI.Gumps
                     foreach (MessageType item in Enum.GetValues(typeof(MessageType)))
                     {
                         string entryName = string.Empty;
-                        switch (item)
-                        {
-                            case MessageType.Regular:
-                                entryName = "Regular";
-                                break;
-                            case MessageType.System:
-                                entryName = "System";
-                                break;
-                            case MessageType.Emote:
-                                entryName = "Emote";
-                                break;
-                            case MessageType.Limit3Spell:
-                                entryName = "Limit3Spell(Sphere)";
-                                break;
-                            case MessageType.Label:
-                                entryName = "Label";
-                                break;
-                            case MessageType.Focus:
-                                entryName = "Focus";
-                                break;
-                            case MessageType.Whisper:
-                                entryName = "Whisper";
-                                break;
-                            case MessageType.Yell:
-                                entryName = "Yell";
-                                break;
-                            case MessageType.Spell:
-                                entryName = "Spell";
-                                break;
-                            case MessageType.Guild:
-                                entryName = "Guild";
-                                break;
-                            case MessageType.Alliance:
-                                entryName = "Alliance";
-                                break;
-                            case MessageType.Command:
-                                entryName = "Command";
-                                break;
-                            case MessageType.Encoded:
-                                entryName = "Encoded";
-                                break;
-                            case MessageType.ChatSystem:
-                                entryName = "Global Chat";
-                                break;
-                            case MessageType.Party:
-                                entryName = "Party";
-                                break;
-                            case MessageType.Log:
-                                entryName = "Log";
-                                break;
-                        }
+                        entryName = Enum.GetName(typeof(MessageType), item);                        
 
                         Add(entryName,
                             () =>

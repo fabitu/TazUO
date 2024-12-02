@@ -546,7 +546,7 @@ namespace ClassicUO.Game.UI.Gumps
                     AutoLootManager.Instance.HandleCorpse(container);
                 }
             }
-        }      
+        }
 
         protected override void OnMouseExit(int x, int y)
         {
@@ -1057,21 +1057,22 @@ namespace ClassicUO.Game.UI.Gumps
                 Task.Factory.StartNew(() =>
                 {
                     var tcount = hcount;
-                    System.Threading.Thread.Sleep(1000);
 
                     if (tcount != hcount) { return; } //Another call has already been made
-                    List<GridHighlightData> highlightConfigs = new List<GridHighlightData>();
+                    List<GridHighlightData> highlightConfigs = [];
                     for (int propIndex = 0; propIndex < ProfileManager.CurrentProfile.GridHighlight_PropNames.Count; propIndex++)
                     {
                         highlightConfigs.Add(GridHighlightData.GetGridHighlightData(propIndex));
                     }
 
+
+                    //TODO: Permitir mais de um HighLight
                     foreach (var item in gridSlots) //For each grid slot
                     {
                         item.Value.SetHighLightBorder(0);
                         if (item.Value.SlotItem != null)
                         {
-                            ItemPropertiesData itemData = new ItemPropertiesData(item.Value.SlotItem);
+                            ItemPropertiesData itemData = new ItemPropertiesData(item.Value.SlotItem, rawText: true);
 
                             if (itemData.HasData)
                             {
@@ -1082,26 +1083,26 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         if (!fullMatch) break;
                                         bool hasProp = false;
+                                        GameActions.Log(itemData.RawData);
                                         foreach (var singleProperty in itemData.singlePropertyData) //For each property on the item
                                         {
                                             if (singleProperty.Name.ToLower().Contains(configData.Properties[i].ToLower()) || singleProperty.OriginalString.ToLower().Contains(configData.Properties[i].ToLower())) //This property has a match for this highlight search text
                                             {
                                                 hasProp = true;
-                                                if (singleProperty.FirstValue >= configData.PropMinVal[i]) //This property matches the highlight property
-                                                    fullMatch = true;
-                                                else if (configData.PropMinVal[i] == -1)
-                                                    fullMatch = true;
+                                                if (singleProperty.FirstValue >= configData.PropMinVal[i] || configData.PropMinVal[i] == -1)
+                                                    fullMatch = true;                                                                                                
                                                 else
                                                     fullMatch = false;
                                             }
                                         }
                                         if (!hasProp) fullMatch = false;
                                     }
-                                    if (fullMatch) item.Value.SetHighLightBorder(configData.Hue);
+                                    if (fullMatch)
+                                    {
+                                        item.Value.SetHighLightBorder(configData.Hue);
+                                    }
                                 }
                             }
-                            //EP: TODO: Adicionar filter by name colocar a cor do fundo diferente baseado no nome (preferencia de loot manual)
-                            
                         }
                     }
                 });
@@ -1123,7 +1124,7 @@ namespace ClassicUO.Game.UI.Gumps
             AlphaBlendControl background;
             private CustomToolTip toolTipThis, toolTipitem1, toolTipitem2;
 
-            private bool borderHighlight = false;
+            private bool IsHighlight = false;
             private ushort borderHighlightHue = 0;
 
             public bool Hightlight = false;
@@ -1167,7 +1168,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             public void SetHighLightBorder(ushort hue)
             {
-                borderHighlight = hue == 0 ? false : true;
+                IsHighlight = hue == 0 ? false : true;
                 borderHighlightHue = hue;
             }
             public void Resize()
@@ -1204,34 +1205,27 @@ namespace ClassicUO.Game.UI.Gumps
                     //EP: Set Stackable count
                     int itemAmt = 0;
                     double stones = 0;
+
                     if (_item.ItemData.IsStackable)
                     {
                         itemAmt = item.Amount;
                     }
                     //EP: Set Container inside count
-                    if (_item.ItemData.IsStackable || _item.ItemData.IsContainer)
+
+                    string rawProp = ReadProperties(_item.Serial, out string htmlText);
+                    GameActions.Log($"Name {_item.Name} {rawProp}");
+                    var prop = rawProp.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (prop.Length > 0)
                     {
-                        string rawProp = ReadProperties(_item.Serial, out string htmlText);
-                        //GameActions.Log($"Serial{_item.Serial} Prop:{rawProp}  ");                        
-                        var prop = rawProp.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                        if (prop.Length > 0)
+                        foreach (var propLine in prop)
                         {
-                            foreach (var propLine in prop)
-                            {
-                                var tItens = MatchCountAndStones(propLine);
-                                if (_item.ItemData.IsContainer)
-                                    itemAmt = tItens.Item1;
-                                stones = tItens.Item2;
-                            }
-                        }                    
-                        
-                        //else
-                        //{
-                        //    GameActions.LogError($"Serial{_item.Serial} Prop: Is Null");
-                        //}
-
+                            var tItens = MatchCountAndStones(propLine);
+                            if (!_item.ItemData.IsStackable)
+                                itemAmt = tItens.Item1;
+                            stones = tItens.Item2;
+                        }
                     }
-
                     if (_item.ItemData.IsStackable && itemAmt > 1 || _item.ItemData.IsContainer && itemAmt > 0)
                     {
                         count?.Dispose();
@@ -1258,7 +1252,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
             private ushort GetHue(double stones)
-            {               
+            {
                 var percent = ((World.Player.Weight + stones) / World.Player.WeightMax) * 100;
                 if (percent < 50) //green
                     return 68;
@@ -1289,6 +1283,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 return new Tuple<int, double>(0, 0.00);
             }
+
+            private bool MatchText(string text, string pattern)
+            {
+
+                // Create the regex object
+                Regex regex = new(pattern);
+
+                // Match the text using the regex pattern
+                Match match = regex.Match(text);
+
+                // If a match is found, extract the numbers
+                return match.Success;
+            }
+
             private string ReadProperties(uint serial, out string htmltext)
             {
                 bool hasStartColor = false;
@@ -1516,7 +1524,7 @@ namespace ClassicUO.Game.UI.Gumps
             private Rectangle bounds;
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {                
+            {
                 if (_item != null && _item.ItemData.Layer > 0 && hit.MouseIsOver && Keyboard.Ctrl && (toolTipThis == null || toolTipThis.IsDisposed) && (toolTipitem1 == null || toolTipitem1.IsDisposed) && (toolTipitem2 == null || toolTipitem2.IsDisposed))
                 {
                     Item compItem = World.Player.FindItemByLayer((Layer)_item.ItemData.Layer);
@@ -1581,67 +1589,24 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVector = ShaderHueTranslator.GetHueVector(0x34, false, 1);
                 }
 
-                batcher.DrawRectangle
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    hueVector
-                );
+                //Borders
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.White), x, y, Width, Height, hueVector);
 
-                if (borderHighlight)
+                if (IsHighlight)
                 {
-                    int bx = x + 6;
-                    int by = y + 6;
                     int bsize = ProfileManager.CurrentProfile.GridHightlightSize;
-
-
                     Texture2D borderTexture = SolidColorTextureCache.GetTexture(Color.White);
-                    Vector3 borderHueVec = ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 0.8f);
+                    Vector3 borderHueVec = ShaderHueTranslator.GetHueVector(borderHighlightHue, false, 2.0f);
 
-                    batcher.Draw( //Top bar
-                        borderTexture,
-                        new Rectangle(bx, by, Width - 12, bsize),
-                        borderHueVec
-                        );
-
-                    batcher.Draw( //Left Bar
-                        borderTexture,
-                        new Rectangle(bx, by + bsize, bsize, Height - 12 - bsize * 2),
-                        borderHueVec
-                        );
-
-                    batcher.Draw( //Right Bar
-                        borderTexture,
-                        new Rectangle(bx + Width - 12 - bsize, by + bsize, bsize, Height - 12 - bsize * 2),
-                        borderHueVec
-                        );
-
-                    batcher.Draw( //Bottom bar
-                        borderTexture,
-                        new Rectangle(bx, by + Height - 12 - bsize, Width - 12, bsize),
-                        borderHueVec
-                        );
+                    batcher.Draw(borderTexture, new Rectangle(x, y, Height, Width), borderHueVec);
                 }
 
+                //Selected Item
                 if (hit.MouseIsOver && _item != null)
                 {
                     hueVector.Z = 0.3f;
-
-                    batcher.Draw
-                    (
-                        SolidColorTextureCache.GetTexture(Color.White),
-                        new Rectangle
-                        (
-                            x + 1,
-                            y,
-                            Width - 1,
-                            Height
-                        ),
-                        hueVector
-                    );
+                    //Over
+                    batcher.Draw(SolidColorTextureCache.GetTexture(Color.White), new Rectangle(x + 1, y, Width - 1, Height), hueVector);
                 }
 
                 if (_item != null && texture != null & rect != null)
@@ -1692,20 +1657,8 @@ namespace ClassicUO.Game.UI.Gumps
                     batcher.Draw
                     (
                         texture,
-                        new Rectangle
-                        (
-                            x + point.X,
-                            y + point.Y + hit.Y,
-                            originalSize.X,
-                            originalSize.Y
-                        ),
-                        new Rectangle
-                        (
-                            bounds.X + rect.X,
-                            bounds.Y + rect.Y,
-                            rect.Width,
-                            rect.Height
-                        ),
+                        new Rectangle(x + point.X, y + point.Y + hit.Y, originalSize.X, originalSize.Y),//texture
+                        new Rectangle(bounds.X + rect.X, bounds.Y + rect.Y, rect.Width, rect.Height),
                         hueVector
                     );
                     count?.Draw(batcher, x + count.X, y + count.Y);
@@ -1808,8 +1761,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     RemoveOldContainers();
 
-                    //EP: Remove All Container
-                    saveDocument.Root.RemoveAll();
                     saveDocument.Save(gridSavePath);
 
                     return true;
@@ -2045,7 +1996,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public static void UpdateAllContainers()
-        {            
+        {
             Parallel.ForEach(OpenedContainers, (x) =>
             {
                 GameActions.Log($"Atualizando {x.container.Name}");
