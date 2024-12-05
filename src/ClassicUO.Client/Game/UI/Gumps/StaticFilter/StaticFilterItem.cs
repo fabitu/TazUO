@@ -104,56 +104,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 ref readonly var text = ref Client.Game.Arts.GetArt(_item.DisplayedGraphic);
                 texture = text.Texture;
                 bounds = text.UV;
-
                 rect = Client.Game.Arts.GetRealArtBounds(_item.DisplayedGraphic);
-
-                LocalSerial = item.Serial;
-                //EP: Set Stackable count
-                int itemAmt = 0;
-                double stones = 0;
-
-                if (_item.ItemData.IsStackable)
-                {
-                    itemAmt = item.Amount;
-                }
-                //EP: Set Container inside count
-
-                string rawProp = ReadProperties(_item.Serial, out string htmlText);
-                GameActions.Log($"Name {_item.Name} {rawProp}");
-                var prop = rawProp.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (prop.Length > 0)
-                {
-                    foreach (var propLine in prop)
-                    {
-                        var tItens = MatchCountAndStones(propLine);
-                        if (!_item.ItemData.IsStackable)
-                            itemAmt = tItens.Item1;
-                        stones = tItens.Item2;
-                    }
-                }
-                if (_item.ItemData.IsStackable && itemAmt > 1 || _item.ItemData.IsContainer && itemAmt > 0)
-                {
-                    count?.Dispose();
-                    count = new Label(itemAmt.ToString(), true, 0x0481)
-                    {
-                        X = 1
-                    };
-                    count.Y = Height - count.Height;
-                }
-                if ((_item.ItemData.IsStackable || _item.ItemData.IsContainer) && stones != 0.00)
-                {
-                    var hue = GetHue(stones);
-                    weight?.Dispose();
-                    weight = new Label(stones.ToString(), true, hue)
-                    {
-                        Y = 1,
-                        X = 1
-                    };
-                }
-
-                if (MultiItemMoveGump.MoveItems.Contains(_item))
-                    Hightlight = true;
+                LocalSerial = item.Serial;             
                 hit.SetTooltip(_item);
             }
         }

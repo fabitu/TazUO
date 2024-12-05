@@ -1,12 +1,8 @@
 ﻿using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using static ClassicUO.Game.UI.Gumps.GridContainer;
 
 namespace ClassicUO.Game.UI.Gumps.StaticFilter

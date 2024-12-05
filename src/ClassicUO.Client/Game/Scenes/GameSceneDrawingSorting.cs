@@ -373,14 +373,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool ProcessAlpha(
-            GameObject obj,
-            ref StaticTiles itemData,
-            bool useCoT,
-            ref Vector2 playerPos,
-            int cotZ,
-            out bool allowSelection
-        )
+        private bool ProcessAlpha(GameObject obj, ref StaticTiles itemData, bool useCoT, ref Vector2 playerPos, int cotZ, out bool allowSelection)
         {
             allowSelection = true;
             if (ProfileManager.CurrentProfile.UseCircleOfTransparency && ProfileManager.CurrentProfile.CircleOfTransparencyType == 2)
@@ -439,6 +432,19 @@ namespace ClassicUO.Game.Scenes
             }
             //EP: Remove os telhados
             else if (_noDrawRoofs && itemData.IsRoof && ProfileManager.CurrentProfile.EnableStaticFilter)
+            {
+                if (_alphaChanged)
+                {
+                    if (!CalculateAlpha(ref obj.AlphaHue, 0))
+                    {
+                        return false;
+                    }
+                }
+
+                return obj.AlphaHue != 0;
+            }
+            //EP: Remove Tudo de acordo com o ALpha
+            else if (itemData.IsWall)
             {
                 if (_alphaChanged)
                 {
@@ -517,13 +523,9 @@ namespace ClassicUO.Game.Scenes
 
         private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha)
         {
-            if (
-                ProfileManager.CurrentProfile != null
-                && !ProfileManager.CurrentProfile.UseObjectsFading
-            )
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseObjectsFading)
             {
                 alphaHue = (byte)maxAlpha;
-
                 return maxAlpha != 0;
             }
 
