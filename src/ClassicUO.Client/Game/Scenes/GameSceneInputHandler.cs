@@ -36,8 +36,10 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Game.UI.Gumps.StaticFilter;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Renderer.Lights;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -454,7 +456,7 @@ namespace ClassicUO.Game.Scenes
             if (!UIManager.IsMouseOverWorld)
             {
                 return false;
-            }           
+            }
 
             //EP: Open Static Filter Gump
             if (Keyboard.Ctrl && Keyboard.Alt)
@@ -465,9 +467,8 @@ namespace ClassicUO.Game.Scenes
                     graphic = gameObject.Graphic;
                 }
 
-                //OpenFakeGump(SelectedObject.Object);
+                OpenStaticFilterGump(SelectedObject.Object);
             }
-
 
             if (World.CustomHouseManager != null)
             {
@@ -1336,7 +1337,7 @@ namespace ClassicUO.Game.Scenes
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
             //EP: Enable/Disable Static Filter
-            if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift && e.repeat == 0) 
+            if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift && e.repeat == 0)
             {
                 ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
                 GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
@@ -1382,9 +1383,9 @@ namespace ClassicUO.Game.Scenes
 
                         //    if (!World.Player.InWarMode)
                         //    {
-                                NetClient.Socket.Send_ChangeWarMode(!World.Player.InWarMode);
-                          //  }
-                       // }
+                        NetClient.Socket.Send_ChangeWarMode(!World.Player.InWarMode);
+                        //  }
+                        // }
                     }
 
                     break;
@@ -1761,6 +1762,23 @@ namespace ClassicUO.Game.Scenes
             Macros.WaitingBandageTarget = false;
             Macros.WaitForTargetTimer = 0;
             Macros.Update();
+        }
+
+        private void OpenStaticFilterGump(BaseGameObject seletedObject)
+        {
+            StaticFilterFakeGump staticFilter = UIManager.GetGump<StaticFilterFakeGump>();
+
+            if (staticFilter == null)
+            {
+                staticFilter = new StaticFilterFakeGump(seletedObject);                
+                UIManager.Add(staticFilter);
+            }
+            else
+            {
+                UIManager.Gumps.Remove(staticFilter);
+                staticFilter.Dispose();
+                OpenStaticFilterGump(seletedObject);
+            }
         }
     }
 }

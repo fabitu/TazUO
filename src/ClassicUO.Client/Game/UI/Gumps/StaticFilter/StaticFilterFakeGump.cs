@@ -5,19 +5,17 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Resources;
-using CUO_APINetPipes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClassicUO.Game.UI.Gumps
+namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
-    internal class StaticFilterGump : ResizableGump
+    internal class StaticFilterFakeGump : Gump
     {
         private readonly ushort? _graphic;
-        uint _serial;
 
         private PreferenceManagerBase currentPreferenceMannager;
         #region Mannagers
@@ -38,17 +36,10 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         BaseGameObject _seletedObject;
+ 
 
-        public StaticFilterGump(uint serial) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), serial, 0)
+        public StaticFilterFakeGump(BaseGameObject seletedObject) : base(0, 0)
         {
-            _serial = serial;
-            EnsureContextMenu();
-            ShowContextMenu();
-        }
-
-        public StaticFilterGump(BaseGameObject seletedObject, uint serial) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), serial, 0)
-        {
-            _serial = serial;
             _seletedObject = seletedObject;
             EnsureContextMenu();
             ShowContextMenu();
@@ -62,7 +53,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (_graphic != null) { ContextMenu.Add(ResGumps.Remove, RemoveItem); }
         }
 
-      
 
         public void ShowContextMenu()
         {
@@ -75,11 +65,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (staticFilterGump == null)
             {
-                staticFilterGump = new StaticFilterGump(_serial)
+                staticFilterGump = new StaticFilterGump(_seletedObject)
                 {
                     X = Mouse.Position.X,
                     Y = Mouse.Position.Y
                 };
+
                 UIManager.Add(staticFilterGump);
                 staticFilterGump.SetInScreen();
             }

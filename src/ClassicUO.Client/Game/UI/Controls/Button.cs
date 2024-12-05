@@ -44,7 +44,13 @@ namespace ClassicUO.Game.UI.Controls
     {
         Default = 0,
         SwitchPage = 0,
-        Activate = 1
+        Activate = 1,
+        Add = 2,
+        Remove = 3,
+        PreviousPage = 4,
+        NextPage = 5,
+        ChangeContext = 6,
+        Apply = 7
     }
 
     public class Button : Control

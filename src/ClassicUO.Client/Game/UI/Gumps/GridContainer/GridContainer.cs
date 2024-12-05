@@ -1,16 +1,13 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Renderer.Lights;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Concurrent;
@@ -22,7 +19,6 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -89,16 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         #endregion
 
         #region public vars
-        public readonly bool IsPlayerBackpack = false;
-
-        public GridSlotManager GetGridSlotManager { get { return gridSlotManager; } }
-
-        public List<Item> GetContents { get { return gridSlotManager.ContainerContents; } }
-
-        /// <summary>
-        /// Set to true to avoid saving the current grid slots.
-        /// </summary>
-        public bool SkipSave { get { return skipSave; } set { skipSave = value; } }
+        public readonly bool IsPlayerBackpack = false;                       
         #endregion
 
         public GridContainer(uint serial, ushort originalContainerGraphic, bool? useGridStyle = null) : base(GetWidth(), GetHeight(), GetWidth(2), GetHeight(1), serial, 0)
@@ -212,8 +199,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildSetLootBag()
         {
-            setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag") { IsSelectable = false };
-            setLootBag.IsVisible = isCorpse;
+            setLootBag = new NiceButton(0, Height - 20, 100, 20, ButtonAction.Default, "Set loot bag")
+            {
+                IsSelectable = false,
+                IsVisible = isCorpse
+            };
             setLootBag.SetTooltip("For double click looting only");
             setLootBag.MouseUp += (s, e) =>
             {
@@ -598,7 +588,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container != null && gridSlotManager != null && !skipSave)
                 if (gridSlotManager.ItemPositions.Count > 0 && !isCorpse)
                     GridSaveSystem.Instance.SaveContainer(container, gridSlotManager.GridSlots, Width, Height, X, Y, UseOldContainerStyle, autoSortContainer);
-            GridContainerManager.RemoveContainer(this);
+            GridContainerManager.RemoveContainer();
             base.Dispose();
         }
 
@@ -826,13 +816,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public class GridSlotManager
         {
-            private Dictionary<int, GridItem> gridSlots = new Dictionary<int, GridItem>();
+            private Dictionary<int, GridItem> gridSlots = [];
             private Item container;
             private List<Item> containerContents;
             private int amount = 125;
             private Control area;
-            private Dictionary<int, uint> itemPositions = new Dictionary<int, uint>();
-            private List<uint> itemLocks = new List<uint>();
+            private Dictionary<int, uint> itemPositions = [];
+            private List<uint> itemLocks = [];
 
             public Dictionary<int, GridItem> GridSlots { get { return gridSlots; } }
             public List<Item> ContainerContents { get { return containerContents; } }
@@ -856,7 +846,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < amount; i++)
                 {
-                    GridItem GI = new GridItem(0, gridItemSize, container, gridContainer, i);
+                    GridItem GI = new(0, gridItemSize, container, gridContainer, i);
                     gridSlots.Add(i, GI);
                     area.Add(GI);
                 }
@@ -983,7 +973,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (ProfileManager.CurrentProfile.GridContainerSearchMode == 0) //Hide search mode
                     {
-                        List<Item> filteredContents = new List<Item>();
+                        List<Item> filteredContents = [];
                         foreach (Item i in containerContents)
                         {
                             if (SearchItemNameAndProps(search, i))
@@ -1027,7 +1017,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public static List<Item> GetItemsInContainer(Item _container)
             {
-                List<Item> contents = new List<Item>();
+                List<Item> contents = [];
                 for (LinkedObject i = _container.Items; i != null; i = i.Next)
                 {
                     Item item = (Item)i;
@@ -1065,14 +1055,13 @@ namespace ClassicUO.Game.UI.Gumps
                         highlightConfigs.Add(GridHighlightData.GetGridHighlightData(propIndex));
                     }
 
-
                     //TODO: Permitir mais de um HighLight
                     foreach (var item in gridSlots) //For each grid slot
                     {
                         item.Value.SetHighLightBorder(0);
                         if (item.Value.SlotItem != null)
                         {
-                            ItemPropertiesData itemData = new ItemPropertiesData(item.Value.SlotItem, rawText: true);
+                            ItemPropertiesData itemData = new(item.Value.SlotItem, rawText: true);
 
                             if (itemData.HasData)
                             {
@@ -1115,7 +1104,7 @@ namespace ClassicUO.Game.UI.Gumps
             private bool mousePressedWhenEntered = false;
             private readonly Item container;
             private Item _item;
-            private readonly GridContainer gridContainer;
+            private readonly GridContainer _gump;
             public bool ItemGridLocked = false;
             private readonly int slot;
             private GridContainerPreview preview;
@@ -1136,7 +1125,7 @@ namespace ClassicUO.Game.UI.Gumps
                 #region VARS
                 slot = count;
                 container = _container;
-                this.gridContainer = gridContainer;
+                _gump = gridContainer;
                 LocalSerial = serial;
                 _item = World.Items.Get(serial);
                 CanMove = true;
@@ -1361,7 +1350,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     return;
                 }
-                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && gridContainer.isCorpse && !_item.IsDestroyed && !_item.ItemData.IsContainer && container != World.Player.FindItemByLayer(Layer.Backpack) && !_item.IsLocked && _item.IsLootable)
+                if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && _gump.isCorpse && !_item.IsDestroyed && !_item.ItemData.IsContainer && container != World.Player.FindItemByLayer(Layer.Backpack) && !_item.IsLocked && _item.IsLootable)
                 {
                     GameActions.GrabItem(_item, _item.Amount);
                 }
@@ -1391,7 +1380,7 @@ namespace ClassicUO.Game.UI.Gumps
                         else
                         {
                             Rectangle containerBounds = ContainerManager.Get(container.Graphic).Bounds;
-                            gridContainer.gridSlotManager.AddLockedItemSlot(Client.Game.GameCursor.ItemHold.Serial, slot);
+                            _gump.gridSlotManager.AddLockedItemSlot(Client.Game.GameCursor.ItemHold.Serial, slot);
                             GameActions.DropItem(Client.Game.GameCursor.ItemHold.Serial, containerBounds.Width / 2, containerBounds.Height / 2, 0, container.Serial);
                             Mouse.CancelDoubleClick = true;
                         }
@@ -1412,14 +1401,14 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (Keyboard.Ctrl)
                     {
-                        gridContainer.gridSlotManager.SetLockedSlot(slot, !ItemGridLocked);
+                        _gump.gridSlotManager.SetLockedSlot(slot, !ItemGridLocked);
                         Mouse.CancelDoubleClick = true;
                     }
                     else if (Keyboard.Alt && _item != null)
                     {
                         if (!MultiItemMoveGump.MoveItems.Contains(_item))
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
-                        MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                        MultiItemMoveGump.AddMultiItemMoveGumpToUI(_gump.X - 200, _gump.Y);
                         SelectHighlight = true;
                         Mouse.CancelDoubleClick = true;
                     }
@@ -1433,7 +1422,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Point offset = Mouse.LDragOffset;
                         if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                         {
-                            if (gridContainer.isCorpse && ProfileManager.CurrentProfile.CorpseSingleClickLoot || gridContainer.quickLootThisContainer)
+                            if (_gump.isCorpse && ProfileManager.CurrentProfile.CorpseSingleClickLoot || _gump.quickLootThisContainer)
                             {
                                 GameActions.GrabItem(_item.Serial, _item.Amount);
                                 Mouse.CancelDoubleClick = true;
@@ -1441,7 +1430,7 @@ namespace ClassicUO.Game.UI.Gumps
                             else
                             {
                                 if (World.ClientFeatures.TooltipsEnabled)
-                                    DelayedObjectClickManager.Set(_item.Serial, gridContainer.X, gridContainer.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                    DelayedObjectClickManager.Set(_item.Serial, _gump.X, _gump.Y - 80, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                                 else
                                 {
                                     GameActions.SingleClick(_item.Serial);
@@ -1468,10 +1457,10 @@ namespace ClassicUO.Game.UI.Gumps
                             if (ProfileManager.CurrentProfile.HoldAltToMoveGumps)
                             {
                                 if (Keyboard.Alt)
-                                    UIManager.AttemptDragControl(gridContainer);
+                                    UIManager.AttemptDragControl(_gump);
                             }
                             else
-                                UIManager.AttemptDragControl(gridContainer);
+                                UIManager.AttemptDragControl(_gump);
                         }
                     }
                 }
@@ -1480,7 +1469,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (!MultiItemMoveGump.MoveItems.Contains(_item))
                         MultiItemMoveGump.MoveItems.Enqueue(_item);
-                    MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                    MultiItemMoveGump.AddMultiItemMoveGumpToUI(_gump.X - 200, _gump.Y);
                     SelectHighlight = true;
                 }
 
@@ -1510,7 +1499,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (!MultiItemMoveGump.MoveItems.Contains(_item))
                             MultiItemMoveGump.MoveItems.Enqueue(_item);
-                        MultiItemMoveGump.AddMultiItemMoveGumpToUI(gridContainer.X - 200, gridContainer.Y);
+                        MultiItemMoveGump.AddMultiItemMoveGumpToUI(_gump.X - 200, _gump.Y);
                         SelectHighlight = true;
                     }
 
@@ -1531,7 +1520,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (compItem != null && (Layer)_item.ItemData.Layer != Layer.Backpack)
                     {
                         hit.ClearTooltip();
-                        List<CustomToolTip> toolTipList = new List<CustomToolTip>();
+                        List<CustomToolTip> toolTipList = [];
                         toolTipThis = new CustomToolTip(_item, Mouse.Position.X + 5, Mouse.Position.Y + 5, hit, compareTo: compItem);
                         toolTipList.Add(toolTipThis);
                         toolTipitem1 = new CustomToolTip(compItem, toolTipThis.X + toolTipThis.Width + 10, toolTipThis.Y, hit, "<basefont color=\"orange\">Equipped Item<br>");
@@ -1773,7 +1762,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public List<GridItemSlotSaveData> GetItemSlots(uint container)
             {
-                List<GridItemSlotSaveData> items = new List<GridItemSlotSaveData>();
+                List<GridItemSlotSaveData> items = [];
 
                 XElement thisContainer = rootElement.Element("container_" + container.ToString());
                 if (thisContainer != null)
@@ -1897,7 +1886,7 @@ namespace ClassicUO.Game.UI.Gumps
             private void RemoveOldContainers()
             {
                 long cutOffTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - TIME_CUTOFF;
-                List<XElement> removeMe = new List<XElement>();
+                List<XElement> removeMe = [];
                 foreach (XElement container in rootElement.Elements())
                 {
                     XAttribute lastOpened = container.Attribute("last_opened");
@@ -1974,23 +1963,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public GridItemSlotSaveData(int slot, uint serial, bool isLocked)
                 {
-                    this.Slot = slot;
-                    this.Serial = serial;
-                    this.IsLocked = isLocked;
+                    Slot = slot;
+                    Serial = serial;
+                    IsLocked = isLocked;
                 }
             }
         }
     }
-
     public static class GridContainerManager
     {
-        private static ConcurrentBag<GridContainer> OpenedContainers = [];
+        private static readonly ConcurrentBag<GridContainer> OpenedContainers = [];
 
         public static void AddContainer(GridContainer container)
         {
             OpenedContainers.Add(container);
         }
-        public static void RemoveContainer(GridContainer container)
+        public static void RemoveContainer()
         {
             OpenedContainers.TryTake(out GridContainer _);
         }
@@ -2025,9 +2013,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = x - WIDTH - 20;
             Y = y - HEIGHT - 20;
-            _background = new AlphaBlendControl();
-            _background.Width = WIDTH;
-            _background.Height = HEIGHT;
+            _background = new AlphaBlendControl
+            {
+                Width = WIDTH,
+                Height = HEIGHT
+            };
 
             CanCloseWithRightClick = true;
             Add(_background);
@@ -2052,7 +2042,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (currentCount > 8)
                             break;
 
-                        StaticPic gridItem = new StaticPic(item.DisplayedGraphic, item.Hue);
+                        StaticPic gridItem = new(item.DisplayedGraphic, item.Hue);
                         gridItem.X = lastX;
                         if (gridItem.X + GRIDSIZE > WIDTH)
                         {
