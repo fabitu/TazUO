@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
@@ -22,12 +23,10 @@ namespace ClassicUO.Game.Data.Preferences
             filePath = Path.Combine(DirectoryPath, fileName);
             staticCustomItens = LoadFile();
         }
-
         public List<StaticCustomItens> LoadFile()
         {
             return ReadFile();
         }
-
         public List<StaticCustomItens> AddPreference(StaticCustomItens addItem)
         {
             try
@@ -135,6 +134,13 @@ namespace ClassicUO.Game.Data.Preferences
             {
                 Log.Warn($"File {filePath} is Wrong. {ex.Message}");
             }
+        }
+
+        public void ReloadPreferences()
+        {
+            Client.LoadTileData();
+            OptionsGump optionsGump = new();
+            optionsGump.Apply();
         }
     }
 }

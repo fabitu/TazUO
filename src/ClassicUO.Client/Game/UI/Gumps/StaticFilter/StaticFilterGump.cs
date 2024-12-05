@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data.Preferences;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -12,6 +13,11 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
     internal class StaticFilterGump : ResizableGump
     {
+        #region Mannagers
+        private PreferenceManagerBase currentPreferenceMannager;
+        private readonly PreferenceManagerBase _wallMannager = new PreferenceWallManager();
+        private readonly PreferenceManagerBase _doorsMannager = new PreferenceDoorMannager();
+        #endregion
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
         private const int TOP_BAR_HEIGHT = 20;

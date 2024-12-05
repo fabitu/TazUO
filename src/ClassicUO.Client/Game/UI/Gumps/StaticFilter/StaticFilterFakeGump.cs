@@ -7,6 +7,7 @@ using ClassicUO.Input;
 using ClassicUO.Resources;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,8 +18,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
     {
         private readonly ushort? _graphic;
 
-        private PreferenceManagerBase currentPreferenceMannager;
         #region Mannagers
+        private PreferenceManagerBase currentPreferenceMannager;
         private readonly PreferenceManagerBase _wallMannager = new PreferenceWallManager();
         private readonly PreferenceManagerBase _doorsMannager = new PreferenceDoorMannager();
         #endregion
@@ -36,11 +37,16 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
 
         BaseGameObject _seletedObject;
- 
+
 
         public StaticFilterFakeGump(BaseGameObject seletedObject) : base(0, 0)
         {
             _seletedObject = seletedObject;
+            if (SelectedObject.Object is GameObject gameObject)
+            {
+                _graphic = gameObject.Graphic;
+            }
+
             EnsureContextMenu();
             ShowContextMenu();
         }
@@ -86,9 +92,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             if (_graphic != null)
             {
                 currentPreferenceMannager.RemoveGraphic(_graphic.Value);
-                Client.LoadTileData();
-                OptionsGump optionsGump = new();
-                optionsGump.Apply();
+                currentPreferenceMannager.ReloadPreferences();
             }
         }
 
@@ -97,9 +101,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             if (_graphic != null)
             {
                 currentPreferenceMannager.RemoveGraphic(_graphic.Value);
-                Client.LoadTileData();
-                OptionsGump optionsGump = new();
-                optionsGump.Apply();
+                currentPreferenceMannager.ReloadPreferences();
             }
         }
 
