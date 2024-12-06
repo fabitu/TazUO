@@ -1340,11 +1340,7 @@ namespace ClassicUO.Game.Scenes
             if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift && e.repeat == 0)
             {
                 ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
-                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
-                for (int i = 0; i < 100; i++)
-                {
-                    GameActions.Log($"{i}-{(ushort)i}", (ushort)i);
-                }
+                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);              
             }
 
             //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)

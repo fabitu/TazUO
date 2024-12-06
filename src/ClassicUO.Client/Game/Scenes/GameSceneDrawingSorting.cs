@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Scenes
         };
 
         private sbyte _maxGroundZ;
-        private int _maxZ;
+        public int _maxZ { get; set; }
         private Vector2 _minPixel,
             _maxPixel,
             _lastCamOffset;
@@ -158,21 +158,17 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
-                    //    continue;
-
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
                         ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[
                             obj.Graphic
                         ];
 
-                        //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         if (
                             ((ulong)itemdata.Flags & 0x20004) == 0
                             && (!itemdata.IsRoof || itemdata.IsSurface)
                         )
-                        {
+                        {                            
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
                         }
@@ -412,6 +408,12 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
+
+            if ((obj is Static st) && st.ItemData.IsWall && ProfileManager.CurrentProfile.EnableStaticFilter)
+            {
+                _maxZ = World.Player.Z + 15;
+            }
+
             if (obj.Z >= _maxZ)
             {
                 bool changed;
@@ -442,20 +444,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 return obj.AlphaHue != 0;
-            }
-            //EP: Remove Tudo de acordo com o ALpha
-            else if (itemData.IsWall)
-            {
-                if (_alphaChanged)
-                {
-                    if (!CalculateAlpha(ref obj.AlphaHue, 0))
-                    {
-                        return false;
-                    }
-                }
-
-                return obj.AlphaHue != 0;
-            }
+            }        
             else if (itemData.IsTranslucent)
             {
                 if (_alphaChanged)
@@ -465,10 +454,7 @@ namespace ClassicUO.Game.Scenes
             }
             else if (!itemData.IsFoliage)
             {
-                if (
-                    useCoT
-                    && CheckCircleOfTransparencyRadius(obj, cotZ, ref playerPos, ref allowSelection)
-                ) { }
+                if (useCoT && CheckCircleOfTransparencyRadius(obj, cotZ, ref playerPos, ref allowSelection)) { }
                 else if (_alphaChanged && obj.AlphaHue != 0xFF)
                 {
                     CalculateAlpha(ref obj.AlphaHue, 0xFF);

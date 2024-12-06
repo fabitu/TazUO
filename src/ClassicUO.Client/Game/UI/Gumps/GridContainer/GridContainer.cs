@@ -1071,8 +1071,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     for (int i = 0; i < configData.Properties.Count; i++) //For each property in a single grid highlight config
                                     {
                                         if (!fullMatch) break;
-                                        bool hasProp = false;
-                                        GameActions.Log(itemData.RawData);
+                                        bool hasProp = false;                                      
                                         foreach (var singleProperty in itemData.singlePropertyData) //For each property on the item
                                         {
                                             if (singleProperty.Name.ToLower().Contains(configData.Properties[i].ToLower()) || singleProperty.OriginalString.ToLower().Contains(configData.Properties[i].ToLower())) //This property has a match for this highlight search text
@@ -1201,8 +1200,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     //EP: Set Container inside count
 
-                    string rawProp = ReadProperties(_item.Serial, out string htmlText);
-                    GameActions.Log($"Name {_item.Name} {rawProp}");
+                    string rawProp = ReadProperties(_item.Serial, out string htmlText);                   
                     var prop = rawProp.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (prop.Length > 0)
@@ -1986,8 +1984,7 @@ namespace ClassicUO.Game.UI.Gumps
         public static void UpdateAllContainers()
         {
             Parallel.ForEach(OpenedContainers, (x) =>
-            {
-                GameActions.Log($"Atualizando {x.container.Name}");
+            {           
                 x.UpdateItems();
             });
         }

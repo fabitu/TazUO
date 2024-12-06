@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SelectedObject.Object is Static stat)
                 {
-                    sb.Append($" Name: {stat.Name}  Flags: {stat.ItemData.Flags}");
+                    sb.Append($" Name: {stat.Name}  Flags: {stat.ItemData.Flags} Alpha: {stat.AlphaHue}");
                 }
                 else if (SelectedObject.Object is Item item)
                 {
