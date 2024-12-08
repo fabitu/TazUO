@@ -14,8 +14,8 @@ namespace ClassicUO.Game.Data.Preferences
 
         public PreferenceDoorMannager() : base(FILENAME)
         {
-            defaultReplaceGraphic = ProfileManager.CurrentProfile.DefaultDoorGraphic;
-            defaultReplaceGraphicList = _defaultReplaceGraphicList;
+            //defaultReplaceGraphic = ProfileManager.CurrentProfile.DefaultDoorGraphic;
+            //defaultReplaceGraphicList = _defaultReplaceGraphicList;
         }
     }
 }

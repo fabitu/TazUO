@@ -30,6 +30,7 @@
 
 #endregion
 
+using ClassicUO.Game.GameObjects;
 using System;
 using System.Diagnostics;
 
@@ -312,6 +313,6 @@ namespace ClassicUO.Game
 
                 unitsize *= 2;
             }
-        }
+        }      
     }
 }

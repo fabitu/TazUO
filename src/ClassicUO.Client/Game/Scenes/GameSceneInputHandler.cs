@@ -461,13 +461,10 @@ namespace ClassicUO.Game.Scenes
             //EP: Open Static Filter Gump
             if (Keyboard.Ctrl && Keyboard.Alt)
             {
-                ushort? graphic = null;
                 if (SelectedObject.Object is GameObject gameObject)
                 {
-                    graphic = gameObject.Graphic;
+                    OpenStaticFilterGump(gameObject);
                 }
-
-                OpenStaticFilterGump(SelectedObject.Object);
             }
 
             if (World.CustomHouseManager != null)
@@ -514,10 +511,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool OnLeftMouseUp()
         {
-            if (
-                UIManager.PopupMenu != null
-                && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
-            )
+            if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
             {
                 UIManager.ShowGamePopup(null);
             }
@@ -565,10 +559,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            if (
-                Client.Game.GameCursor.ItemHold.Enabled
-                && !Client.Game.GameCursor.ItemHold.IsFixedPosition
-            )
+            if (Client.Game.GameCursor.ItemHold.Enabled && !Client.Game.GameCursor.ItemHold.IsFixedPosition)
             {
                 uint drop_container = 0xFFFF_FFFF;
                 bool can_drop = false;
@@ -729,7 +720,6 @@ namespace ClassicUO.Game.Scenes
                         break;
 
                     case CursorTarget.SetTargetClientSide:
-
                         {
                             BaseGameObject obj = lastObj;
 
@@ -767,7 +757,6 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         break;
-
                     case CursorTarget.HueCommandTarget:
 
                         if (SelectedObject.Object is Entity selectedEntity)
@@ -805,7 +794,7 @@ namespace ClassicUO.Game.Scenes
                                     break;
                             }
                         }
-                        break;
+                        break;                   
                 }
             }
             else
@@ -1340,7 +1329,11 @@ namespace ClassicUO.Game.Scenes
             if (Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift && e.repeat == 0)
             {
                 ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
-                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);              
+                GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
+                for (int i = 0; i < 100; i++)
+                {
+                    GameActions.Log($"{i}-{(ushort)i}", (ushort)i);
+                }
             }
 
             //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
@@ -1760,13 +1753,13 @@ namespace ClassicUO.Game.Scenes
             Macros.Update();
         }
 
-        private void OpenStaticFilterGump(BaseGameObject seletedObject)
+        private void OpenStaticFilterGump(GameObject seletedObject)
         {
             StaticFilterFakeGump staticFilter = UIManager.GetGump<StaticFilterFakeGump>();
 
             if (staticFilter == null)
             {
-                staticFilter = new StaticFilterFakeGump(seletedObject);                
+                staticFilter = new StaticFilterFakeGump(seletedObject);
                 UIManager.Add(staticFilter);
             }
             else

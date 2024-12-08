@@ -97,8 +97,6 @@ namespace ClassicUO.Game.Managers
         public uint Serial;
         public ushort X, Y;
         public sbyte Z;
-
-
         public void SetEntity(uint serial)
         {
             Serial = serial;
@@ -106,7 +104,6 @@ namespace ClassicUO.Game.Managers
             X = Y = 0xFFFF;
             Z = sbyte.MinValue;
         }
-
         public void SetStatic(ushort graphic, ushort x, ushort y, sbyte z)
         {
             Serial = 0;
@@ -115,7 +112,6 @@ namespace ClassicUO.Game.Managers
             Y = y;
             Z = z;
         }
-
         public void SetLand(ushort x, ushort y, sbyte z)
         {
             Serial = 0;
@@ -124,7 +120,6 @@ namespace ClassicUO.Game.Managers
             Y = y;
             Z = z;
         }
-
         public void Clear()
         {
             Serial = 0;
@@ -139,8 +134,7 @@ namespace ClassicUO.Game.Managers
         private static uint _targetCursorId, _lastAttack;
         private static readonly byte[] _lastDataBuffer = new byte[19];
 
-        public static uint SelectedTarget;
-
+        public static uint SelectedTarget;    
         public static uint LastAttack
         {
             get { return _lastAttack; }
@@ -181,16 +175,10 @@ namespace ClassicUO.Game.Managers
         }
 
         public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
-
-
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
-
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
-
         public static bool IsTargeting { get; private set; }
-
         public static TargetType TargetingType { get; private set; }
-
         private static void ClearTargetingWithoutTargetCancelPacket()
         {
             if (TargetingState == CursorTarget.MultiPlacement)
@@ -202,7 +190,6 @@ namespace ClassicUO.Game.Managers
 
             IsTargeting = false;
         }
-
         public static void Reset()
         {
             ClearTargetingWithoutTargetCancelPacket();
@@ -211,8 +198,7 @@ namespace ClassicUO.Game.Managers
             _targetCursorId = 0;
             MultiTargetInfo = null;
             TargetingType = 0;
-        }
-
+        }     
         public static void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
@@ -240,8 +226,6 @@ namespace ClassicUO.Game.Managers
 
             _targetCursorId = cursorID;
         }
-
-
         public static void CancelTarget()
         {
             if (TargetingState == CursorTarget.MultiPlacement)
@@ -267,7 +251,6 @@ namespace ClassicUO.Game.Managers
 
             Reset();
         }
-
         public static void SetTargetingMulti
         (
             uint deedSerial,
@@ -289,9 +272,8 @@ namespace ClassicUO.Game.Managers
                 z,
                 hue
             );
-        }
-
-
+        }                 
+     
         public static void Target(uint serial)
         {
             if (!IsTargeting)
@@ -306,7 +288,6 @@ namespace ClassicUO.Game.Managers
                 switch (TargetingState)
                 {
                     case CursorTarget.Invalid: return;
-
                     case CursorTarget.Internal:
                         LastTargetInfo.SetEntity(serial);
                         ClearTargetingWithoutTargetCancelPacket();
@@ -424,7 +405,6 @@ namespace ClassicUO.Game.Managers
                         Mouse.CancelDoubleClick = true;
 
                         break;
-
                     case CursorTarget.Grab:
 
                         if (SerialHelper.IsItem(serial))
@@ -435,7 +415,6 @@ namespace ClassicUO.Game.Managers
                         ClearTargetingWithoutTargetCancelPacket();
 
                         return;
-
                     case CursorTarget.SetGrabBag:
 
                         if (SerialHelper.IsItem(serial))
@@ -464,7 +443,6 @@ namespace ClassicUO.Game.Managers
                 }
             }
         }
-
         public static void Target(ushort graphic, ushort x, ushort y, short z, bool wet = false)
         {
             if (!IsTargeting)
@@ -498,13 +476,11 @@ namespace ClassicUO.Game.Managers
 
             TargetPacket(graphic, x, y, (sbyte)z);
         }
-
         public static void SendMultiTarget(ushort x, ushort y, sbyte z)
         {
             TargetPacket(0, x, y, z);
             MultiTargetInfo = null;
         }
-
         public static void TargetLast()
         {
             if (!IsTargeting)
@@ -524,7 +500,6 @@ namespace ClassicUO.Game.Managers
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }
-
         private static void TargetPacket(ushort graphic, ushort x, ushort y, sbyte z)
         {
             if (!IsTargeting)

@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool CanCloseWithRightClick { get; set; } = true;
 
-        public bool CanCloseWithEsc { get; set; }
+        public bool CanCloseWithEsc { get; set; } 
 
         public bool IsEditable { get; set; }
 

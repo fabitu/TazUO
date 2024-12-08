@@ -17,8 +17,8 @@ namespace ClassicUO.Game.Data.Preferences
 
         public PreferenceWallManager() : base(FILENAME)
         {
-            defaultReplaceGraphic = ProfileManager.CurrentProfile.DefaultWallGraphic;
-            defaultReplaceGraphicList = _defaultReplaceGraphicList;
+            //defaultReplaceGraphic = ProfileManager.CurrentProfile.DefaultWallGraphic;
+            //defaultReplaceGraphicList = _defaultReplaceGraphicList;
         }
     }
 }

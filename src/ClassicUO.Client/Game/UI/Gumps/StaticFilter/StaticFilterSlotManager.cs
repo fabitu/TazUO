@@ -1,9 +1,14 @@
-﻿using ClassicUO.Configuration;
+﻿using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Renderer;
+using ClassicUO.Renderer.Lights;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using static ClassicUO.Game.UI.Gumps.GridContainer;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
@@ -11,39 +16,37 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
     {
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
-        private const int TOP_BAR_HEIGHT = 20;
+        private const int TOP_BAR_HEIGHT = 60;
         #endregion
 
-        private Dictionary<int, StaticFilterItem> gridSlots = new Dictionary<int, StaticFilterItem>();
-        private GameObjectInfo item;
+        public Dictionary<int, StaticFilterItem> gridSlots = [];    
         private List<GameObjectInfo> gridContents;
         private int amount = 125;
         private Control area;
-        private Dictionary<int, uint> itemPositions = new Dictionary<int, uint>();
-        private List<uint> itemLocks = new List<uint>();
+        private Dictionary<int, uint> itemPositions = new();
+        private List<uint> itemLocks = new();
+        private static int slots = 0;
 
         public Dictionary<int, StaticFilterItem> GridSlots { get { return gridSlots; } }
         public List<GameObjectInfo> ContainerContents { get { return gridContents; } }
         public Dictionary<int, uint> ItemPositions { get { return itemPositions; } }
-
-        public StaticFilterSlotManager(StaticFilterGump staticFilter, Control controlArea)
+        public StaticFilterSlotManager(ushort? graphic, Control controlArea)
         {
-            #region VARS
-            area = controlArea;           
-            LoadItens();
-            if (gridContents.Count > 125)
-                amount = gridContents.Count;
-            #endregion
-
-            for (int i = 0; i < amount; i++)
-            {
-                StaticFilterItem GI = new StaticFilterItem(0, gridItemSize, item, staticFilter, i);
-                gridSlots.Add(i, GI);
-                area.Add(GI);
-            }
+            area = controlArea;
+            if (graphic != null)
+                AddItem(graphic.Value);           
+        }        
+        public void AddItem(ushort graphic)
+        {
+            StaticFilterItem GI = new(graphic, slots, gridItemSize);
+            if (GI.texture == null)
+                return;
+            gridSlots.Add(slots, GI);
+            area.Add(GI);
+            slots++;
+            SetGridPositions();
         }
-
-       
+        
         public StaticFilterItem FindItem(uint serial)
         {
             foreach (var slot in gridSlots)
@@ -51,81 +54,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     return slot.Value;
             return null;
         }
-
-        public void RebuildContainer(List<Item> filteredItems, string searchText = "", bool overrideSort = false)
-        {
-            foreach (var slot in gridSlots)
-            {
-                slot.Value.SetGridItem(null);
-            }
-
-            foreach (var spot in itemPositions)
-            {
-                Item i = World.Items.Get(spot.Value);
-                if (i != null)
-                    if (filteredItems.Contains(i) && (!overrideSort || itemLocks.Contains(spot.Value)))
-                    {
-                        if (spot.Key < gridSlots.Count)
-                        {
-                            gridSlots[spot.Key].SetGridItem(i);
-
-                            if (itemLocks.Contains(spot.Value))
-                                gridSlots[spot.Key].ItemGridLocked = true;
-
-                            filteredItems.Remove(i);
-                        }
-                    }
-            }
-
-            foreach (Item i in filteredItems)
-            {
-                foreach (var slot in gridSlots)
-                {
-                    if (slot.Value.SlotItem != null)
-                        continue;
-                    slot.Value.SetGridItem(i);                   
-                    break;
-                }
-            }
-
-            foreach (var slot in gridSlots)
-            {
-                slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && ProfileManager.CurrentProfile.GridContainerSearchMode == 0);
-                if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
-                {
-                    if (SearchItemNameAndProps(searchText, slot.Value.SlotItem))
-                    {
-                        slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
-                        slot.Value.IsVisible = true;
-                    }
-                }
-            }
-            SetGridPositions();            
-        }
-        /// <summary>
-        /// Set the visual grid items to the current GridSlots dict
-        /// </summary>
-        public void SetGridPositions()
-        {
-            int x = X_SPACING, y = 0;
-            foreach (var slot in gridSlots)
-            {
-                if (!slot.Value.IsVisible)
-                {
-                    continue;
-                }
-                if (x + gridItemSize >= area.Width - 14) //14 is the scroll bar width
-                {
-                    x = X_SPACING;
-                    y += gridItemSize + Y_SPACING;
-                }
-                slot.Value.X = x;
-                slot.Value.Y = y;
-                slot.Value.Resize();
-                x += gridItemSize + X_SPACING;
-            }
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -133,7 +61,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         /// <returns>List of items matching the search result, or all items if search is blank/profile does has hide search mode disabled</returns>
         public List<GameObjectInfo> SearchResults(string search)
         {
-            LoadItens(); 
             if (search != "")
             {
                 if (ProfileManager.CurrentProfile.GridContainerSearchMode == 0) //Hide search mode
@@ -174,20 +101,30 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
             return false;
         }
-
-        public void LoadItens()
+        /// <summary>
+        /// Set the visual grid items to the current GridSlots dict
+        /// </summary>
+        public void SetGridPositions()
         {
-            gridContents = GetItemsInContainer();
-        }
+            int x = X_SPACING, y = 0;
+            foreach (var slot in gridSlots)
+            {
+                if (!slot.Value.IsVisible)
+                {
+                    continue;
+                }
+                if (x + gridItemSize >= area.Width - 14) //14 is the scroll bar width
+                {
+                    x = X_SPACING;
+                    y += gridItemSize + Y_SPACING;
+                }
+                slot.Value.X = x;
+                slot.Value.Y = y;
+                slot.Value.Resize();
+                x += gridItemSize + X_SPACING;
+            }
+        }      
 
-        public static List<GameObjectInfo> GetItemsInContainer()
-        {
-            List<GameObjectInfo> contents = [];
-
-           
-            return contents.OrderBy((x) => x.Graphic).ToList();
-        }
-
-        public int hcount = 0;        
+        public int hcount = 0;
     }
 }

@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
             setLootBag.MouseUp += (s, e) =>
             {
                 GameActions.Print(Resources.ResGumps.TargetContainerToGrabItemsInto);
-                TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
+                TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);              
             };
         }
 

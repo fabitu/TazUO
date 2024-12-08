@@ -27,6 +27,42 @@ namespace ClassicUO.Game.Data.Preferences
         {
             return ReadFile();
         }
+
+        public List<StaticCustomItens> SavePreferences(List<StaticCustomItens> preferences)
+        {
+            try
+            {
+                var customItens = ReadFile();
+                customItens = preferences;
+                SaveFile(customItens);
+                return ReadFile();                
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"File {filePath} is Wrong. {ex.Message}");
+                return null;
+            }
+        }
+        public List<StaticCustomItens> SavePreference(StaticCustomItens updatedItem)
+        {
+            try
+            {
+                var customItens = ReadFile();
+                if (customItens != null)
+                {
+                    var customItem = customItens.FirstOrDefault(x => x.Type.Equals(updatedItem.Type, StringComparison.OrdinalIgnoreCase) && x.Description.Equals(updatedItem.Description, StringComparison.OrdinalIgnoreCase));
+                    customItem = updatedItem;
+                    SaveFile(customItens);
+                    return ReadFile();
+                }
+                return customItens;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"File {filePath} is Wrong. {ex.Message}");
+                return null;
+            }
+        }
         public List<StaticCustomItens> AddPreference(StaticCustomItens addItem)
         {
             try
@@ -46,18 +82,24 @@ namespace ClassicUO.Game.Data.Preferences
                 return null;
             }
         }
-        public List<StaticCustomItens> UpdatePreference(StaticCustomItens addItem, ushort graphic)
+        public List<StaticCustomItens> AddGraphic(StaticCustomItens addItem, ushort graphic)
         {
             try
             {
                 List<StaticCustomItens> customItens = ReadFile();
 
                 var customItem = customItens.FirstOrDefault(x => x.Type.Equals(addItem.Type, StringComparison.OrdinalIgnoreCase) && x.Description.Equals(addItem.Description, StringComparison.OrdinalIgnoreCase));
-                if (customItens != null)
+                if (customItem != null)
                 {
-                    customItem?.ToReplaceGraphicArray.Add(graphic);
+                    if (customItem != null && !customItem.ToReplaceGraphicArray.Contains(graphic))
+                        customItem?.ToReplaceGraphicArray.Add(graphic);
                     SaveFile(customItens);
                     return ReadFile();
+                }
+                else
+                {
+                    addItem.ToReplaceGraphicArray.Add(graphic);
+                    AddPreference(addItem);
                 }
                 return customItens;
             }
@@ -135,7 +177,6 @@ namespace ClassicUO.Game.Data.Preferences
                 Log.Warn($"File {filePath} is Wrong. {ex.Message}");
             }
         }
-
         public void ReloadPreferences()
         {
             Client.LoadTileData();

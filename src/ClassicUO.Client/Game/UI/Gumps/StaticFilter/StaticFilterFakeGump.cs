@@ -36,10 +36,9 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         #endregion
 
 
-        BaseGameObject _seletedObject;
+        GameObject _seletedObject;
 
-
-        public StaticFilterFakeGump(BaseGameObject seletedObject) : base(0, 0)
+        public StaticFilterFakeGump(GameObject seletedObject) : base(0, 0)
         {
             _seletedObject = seletedObject;
             if (SelectedObject.Object is GameObject gameObject)

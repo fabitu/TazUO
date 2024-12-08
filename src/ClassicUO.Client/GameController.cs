@@ -59,7 +59,6 @@ namespace ClassicUO
     internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
         private SDL_EventFilter _filter;
-
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
         private bool _ignoreNextTextInput;
         private readonly float[] _intervalFixedUpdate = new float[2];
@@ -68,7 +67,6 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
         private Texture2D _background;
-
         private static Vector3 bgHueShader = new Vector3(0, 0, 0.3f);
 
         public GameController()
