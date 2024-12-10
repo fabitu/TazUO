@@ -16,10 +16,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
     internal class StaticFilterGump : ResizableGump
     {
-        #region Mannagers      
-        private readonly PreferenceManagerBase _wallMannager = new PreferenceWallManager();
-        private readonly PreferenceManagerBase _doorsMannager = new PreferenceDoorMannager();
-        #endregion
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
         private const int TOP_BAR_HEIGHT = 60;
@@ -67,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         private void LoadFiles()
         {
-            Walls = _wallMannager.LoadFile();
+            Walls = StaticFilters.PreferencesWallMannager.LoadFile();
             for (int i = 0; i < Walls.Count; i++)
             {
                 if (Walls[i].ToReplaceGraphicArray.Contains(Graphic.Value))
@@ -239,8 +235,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    _wallMannager.SavePreferences(Walls);
-                    _wallMannager.ReloadPreferences();
+                    StaticFilters.PreferencesWallMannager.SavePreferences(Walls);
+                    StaticFilters.PreferencesWallMannager.ReloadPreferences();
                 }
             };
 
@@ -457,7 +453,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         public override void Dispose()
         {
-            _wallMannager.ReloadPreferences();
+            StaticFilters.PreferencesWallMannager.ReloadPreferences();
             base.Dispose();
         }
     }

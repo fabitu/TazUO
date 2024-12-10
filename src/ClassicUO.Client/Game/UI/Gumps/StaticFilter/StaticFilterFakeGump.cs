@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Data.Preferences;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -21,9 +22,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private readonly ushort? _graphic;
 
         #region Mannagers
-        private static PreferenceManagerBase currentPreferenceMannager;
-        private readonly PreferenceManagerBase _wallMannager = new PreferenceWallManager();
-        private readonly PreferenceManagerBase _doorsMannager = new PreferenceDoorMannager();
+        private static PreferenceManagerBase currentPreferenceMannager; 
         #endregion
 
         #region CONSTANTS
@@ -47,9 +46,9 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 _graphic = gameObject.Graphic;
                 if (st.ItemData.IsWall)
-                    currentPreferenceMannager = _wallMannager;
+                    currentPreferenceMannager = StaticFilters.PreferencesWallMannager;
                 else if (st.ItemData.IsDoor)
-                    currentPreferenceMannager = _doorsMannager;
+                    currentPreferenceMannager = StaticFilters.PreferencesDoorMannager;
 
                 if (st.ItemData.IsWall || st.ItemData.IsDoor)
                 {

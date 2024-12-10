@@ -59,6 +59,8 @@ namespace ClassicUO.Game.Data
         public static List<ushort> TreeTiles = [];
         public static List<StaticCustomItens> WallTiles = [];
         public static List<StaticCustomItens> Doors = [];
+        public static PreferenceManagerBase PreferencesWallMannager = new PreferenceWallManager();
+        public static PreferenceManagerBase PreferencesDoorMannager = new PreferenceDoorMannager();
         public static string DirectoryPath
         {
             get
@@ -77,8 +79,8 @@ namespace ClassicUO.Game.Data
             LoadCaveTiles();
             LoadVegetationTiles();
             LoadTreesTiles();
-            WallTiles = new PreferenceWallManager().LoadFile();
-            Doors = new PreferenceDoorMannager().LoadFile();
+            WallTiles = PreferencesWallMannager.LoadFile();
+            Doors = PreferencesDoorMannager.LoadFile();
         }
 
         private static string EnsureDirectoryPath()
@@ -262,7 +264,7 @@ namespace ClassicUO.Game.Data
                     }
                 }
             }
-        }       
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsTree(ushort g, out int index)
@@ -358,7 +360,7 @@ namespace ClassicUO.Game.Data
         public static bool IsOutStamina()
         {
             return World.Player.Stamina != World.Player.StaminaMax;
-        }        
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsHumanAndMonster(ushort g)
         {
@@ -376,7 +378,7 @@ namespace ClassicUO.Game.Data
 
                 default:
                     return false;
-            }     
+            }
         }
     }
 }
