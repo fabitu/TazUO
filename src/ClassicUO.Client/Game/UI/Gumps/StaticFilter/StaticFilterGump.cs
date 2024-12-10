@@ -23,7 +23,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
         private const int TOP_BAR_HEIGHT = 60;
-        private const ushort HUE = 39;
+        private const ushort LABELHUE = 0x0481;
+        private const ushort TEXTHUE = 0x0000;
         #endregion
 
         #region private static vars
@@ -37,8 +38,9 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private AlphaBlendControl background;
         private StbTextBox graphicTextBox;
         private StbTextBox preferenceNameTextBox;
-        private StbTextBox replaceGraphicTextBox;
+        private StbTextBox replaceToGraphicTextBox;
         private GumpPicTiled backgroundTexture;
+        private StaticPic _replaceImage;
         #endregion
         #region private vars
         public Item container { get { return World.Items.Get(LocalSerial); } }
@@ -80,8 +82,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 item.Parent = null;
                 item.Dispose();
-            }
-            UpdateFields();
+            }           
         }
         public void EnsureSelectedObject(GameObject selectedObject)
         {
@@ -106,19 +107,11 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
             #region TOP BAR AREA
             BuildPreferences();
-
-            BuildGraphicText();
-            BuildAddStatic();
-            BuildSaveStatic();
             #endregion
 
             #region Scroll Area
             BuildScroolArea();
-            #endregion      
-
-            #region Add controlse
-            AddControls();
-            #endregion
+            #endregion              
 
             filterSlotManager = new StaticFilterSlotManager(scrollArea, this, _gridItemSize); //Must come after scroll area         
             BuildBorder();
@@ -127,13 +120,14 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         private void BuildPreferences()
         {
-            var lblPreferenceName = new Label("Preference:", true, HUE)
+            var lblPreferenceName = new Label("Preference:", true, LABELHUE)
             {
                 X = padding,
                 Y = padding,
             };
             Add(lblPreferenceName);
-            preferenceNameTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, 0x0481)
+
+            preferenceNameTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, TEXTHUE)
             {
                 X = lblPreferenceName.EndXPos + 10,
                 Y = padding,
@@ -141,59 +135,53 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 Width = 80,
                 Height = 20
             };
+            preferenceNameTextBox.KeyUp += (sender, e) =>
+            {
+                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_RETURN)
+                {
+                    if (!string.IsNullOrEmpty(preferenceNameTextBox.Text))
+                    {                        
+                        Walls[currentPos].Description = preferenceNameTextBox.Text;
+                        UpdateFields();
+                    }
+                }
+            };
             preferenceNameTextBox.Add(new AlphaBlendControl(0.5f)
             {
                 Hue = 0x0481,
                 Width = preferenceNameTextBox.Width,
                 Height = preferenceNameTextBox.Height
             });
+            Add(preferenceNameTextBox);
 
             NiceButton previous;
-            Add(previous = new NiceButton(preferenceNameTextBox.EndXPos + 10, 18, 20, 20, ButtonAction.Default, "<", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: HUE));
+            Add(previous = new NiceButton(preferenceNameTextBox.EndXPos + 10, 18, 20, 20, ButtonAction.Default, "<", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: LABELHUE));
             previous.SetTooltip("Previous");
             previous.MouseUp += (s, e) =>
             {
                 if (e.Button == MouseButtonType.Left && currentPos > 0)
                 {
                     currentPos--;
+                    ClearItens();
+                    UpdateFields();
                 }
             };
+
             NiceButton next;
-            Add(next = new NiceButton(previous.EndXPos + 10, 18, 20, 20, ButtonAction.Default, ">", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: HUE));
+            Add(next = new NiceButton(previous.EndXPos + 10, 18, 20, 20, ButtonAction.Default, ">", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: LABELHUE));
             next.SetTooltip("Next");
             next.MouseUp += (s, e) =>
             {
                 if (e.Button == MouseButtonType.Left && currentPos < Walls.Count)
                 {
                     currentPos++;
+                    ClearItens();
+                    UpdateFields();
                 }
             };
 
-            var lblReplaceTo = new Label("ReplaceTo:", true, HUE)
-            {
-                X = next.EndXPos + 20,
-                Y = padding,
-            };
-            Add(lblReplaceTo);
-            replaceGraphicTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, 0x0481)
-            {
-                X = lblReplaceTo.X + 50 + 10,
-                Y = padding,
-                Multiline = false,
-                Width = 80,
-                Height = 20
-            };
-            replaceGraphicTextBox.Add(new AlphaBlendControl(0.5f)
-            {
-                Hue = 0x0481,
-                Width = replaceGraphicTextBox.Width,
-                Height = replaceGraphicTextBox.Height
-            });
-        }
-        private void BuildAddStatic()
-        {
             NiceButton add;
-            Add(add = new NiceButton(this.EndXPos - padding - 35, 18, 25, 20, ButtonAction.Default, "Add", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
+            Add(add = new NiceButton(X = next.EndXPos + 20, 18, 25, 20, ButtonAction.Default, "New", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: LABELHUE));
             add.SetTooltip("Add iten to static filter.");
             add.MouseUp += (s, e) =>
             {
@@ -202,16 +190,50 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     if (!Walls.Any(X => X.Description == preferenceNameTextBox.Text))
                     {
                         Walls.Add(new StaticCustomItens() { Description = preferenceNameTextBox.Text });
-                        currentPos = Walls.Count;
+                        currentPos = Walls.Count-1;
+                        ClearItens();
                         UpdateFields();
                     }
                 }
             };
-        }
-        private void BuildSaveStatic()
-        {
+
+            var lblReplaceTo = new Label("ReplaceTo:", true, LABELHUE)
+            {
+                X = add.EndXPos + 100,
+                Y = padding,
+            };
+            Add(lblReplaceTo);
+
+            replaceToGraphicTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, TEXTHUE)
+            {
+                X = lblReplaceTo.EndXPos + 10,
+                Y = padding,
+                Multiline = false,
+                Width = 80,
+                Height = 20
+            };
+            replaceToGraphicTextBox.KeyUp += (sender, e) =>
+            {
+                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_RETURN)
+                {
+                    if (!string.IsNullOrEmpty(replaceToGraphicTextBox.Text))
+                    {
+                        var graphic = (ushort)Convert.ToInt32(replaceToGraphicTextBox.Text);
+                        Walls[currentPos].ReplaceToGraphic = graphic;
+                        UpdateFields();
+                    }
+                }
+            };
+            replaceToGraphicTextBox.Add(new AlphaBlendControl(0.5f)
+            {
+                Hue = 0x0481,
+                Width = replaceToGraphicTextBox.Width,
+                Height = replaceToGraphicTextBox.Height
+            });
+            Add(replaceToGraphicTextBox);
+
             NiceButton save;
-            Add(save = new NiceButton(this.EndXPos - padding , 18, 50, 20, ButtonAction.Default, "Save", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
+            Add(save = new NiceButton(replaceToGraphicTextBox.EndXPos + 100, 18, 50, 20, ButtonAction.Default, "Save", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: LABELHUE));
             save.SetTooltip("Save static file.");
             save.MouseUp += (s, e) =>
             {
@@ -221,18 +243,17 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     _wallMannager.ReloadPreferences();
                 }
             };
-        }
-        private void BuildGraphicText()
-        {
-            var lblReplaceTo = new Label("ToReplace:", true, HUE)
+
+            var lblToReplace = new Label("ToReplace:", true, LABELHUE)
             {
                 X = padding,
                 Y = 44,
             };
-            Add(lblReplaceTo);
-            graphicTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, 0x0481)
+            Add(lblToReplace);
+
+            graphicTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, TEXTHUE)
             {
-                X = lblReplaceTo.EndXPos + 10,
+                X = lblToReplace.EndXPos + 10,
                 Y = 44,
                 Multiline = false,
                 Width = 80,
@@ -257,6 +278,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 Width = graphicTextBox.Width,
                 Height = graphicTextBox.Height
             });
+            Add(graphicTextBox);
         }
         protected override void UpdateContents()
         {
@@ -264,15 +286,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 UpdateFields();
             }
-        }
-        private void AddControls()
-        {
-            Add(background);
-            Add(backgroundTexture);
-            Add(preferenceNameTextBox);
-            Add(replaceGraphicTextBox);
-            Add(graphicTextBox);
-            Add(scrollArea);
         }
         public void BuildBorder()
         {
@@ -329,6 +342,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                             );
 
             scrollArea.MouseUp += ScrollArea_MouseUp;
+            Add(scrollArea);
         }
         private void BuildBackGround()
         {
@@ -341,8 +355,10 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100,
                 Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue
             };
+            Add(background);
 
             backgroundTexture = new GumpPicTiled(0);
+            Add(backgroundTexture);
         }
         #endregion GumpBuild       
         private static int GetWidth(int columns = -1)
@@ -376,7 +392,19 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         {
             var wall = Walls[currentPos];
             preferenceNameTextBox.Text = wall.Description;
-            replaceGraphicTextBox.Text = Convert.ToString(wall.ReplaceToGraphic);
+            replaceToGraphicTextBox.Text = Convert.ToString(wall.ReplaceToGraphic);
+
+            _replaceImage?.Dispose();
+            if (!string.IsNullOrEmpty(replaceToGraphicTextBox.Text))
+            {
+                _replaceImage = new StaticPic((ushort)Convert.ToInt32(replaceToGraphicTextBox.Text), 0)
+                {
+                    UseBorder = true,
+                    X = replaceToGraphicTextBox.EndXPos + 10,
+                    Y = replaceToGraphicTextBox.Y
+                };
+                Add(_replaceImage);
+            }
 
             foreach (var graphic in wall.ToReplaceGraphicArray)
             {

@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Game.UI.Controls;
 using System.Collections.Generic;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
@@ -48,7 +49,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                         slots--;
                     }                   
                 }
-                parent.ClearItens();
+                parent.ClearItens();      
+                parent.UpdateFields();
                 SetGridPositions();
             }
             catch

@@ -104,6 +104,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public bool UseBorder { get; set; }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (hueVector == default)
@@ -112,6 +114,10 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ref readonly var artInfo = ref Client.Game.Arts.GetArt(Graphic);
+
+            //Borders
+            if (UseBorder)
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.White), x, y, Width, Height, hueVector);
 
             if (artInfo.Texture != null)
             {

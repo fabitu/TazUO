@@ -1330,7 +1330,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
                 GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 300; i++)
                 {
                     GameActions.Log($"{i}-{(ushort)i}", (ushort)i);
                 }
