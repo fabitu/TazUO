@@ -41,23 +41,17 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             Graphic = graphic;
 
             ref readonly var text = ref Client.Game.Arts.GetArt(graphic);
-            rect = Client.Game.Arts.GetRealArtBounds(graphic);                                   
+            rect = Client.Game.Arts.GetRealArtBounds(graphic);
             texture = text.Texture;
             bounds = text.UV;
-            
+
             #endregion
 
             Build();
         }
         private void Build()
         {
-            background = new AlphaBlendControl(0.25f)
-            {
-                Width = _size,
-                Height = _size,
-                Hue = 0x0000
-
-            };
+            background = new AlphaBlendControl(2.00f) { Width = _size, Height = _size, Hue = 0x0000 };
             Width = Height = _size;
             Add(background);
 
@@ -65,10 +59,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             Add(hit);
             //GraphicId
             lblGraphic?.Dispose();
-            lblGraphic = new Label(Graphic.ToString(), true, 0x0481)
-            {
-                X = 1
-            };
+            lblGraphic = new Label(Graphic.ToString(), true, 0x0481) { X = 1 };
             lblGraphic.Y = Height - lblGraphic.Height;
             hit.MouseUp += _hit_MouseUp;
         }

@@ -81,8 +81,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 staticFilterGump = new StaticFilterGump(_seletedObject)
                 {
-                    X = Mouse.Position.X,
-                    Y = Mouse.Position.Y
+                    X = 400,
+                    Y = 200
                 };
 
                 UIManager.Add(staticFilterGump);

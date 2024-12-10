@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = WIDTH;
             Height = ProfileManager.CurrentProfile.VendorGumpHeight;
             if (Height < 200)
-                Height = 200;
+                Height = 600;
 
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
@@ -223,14 +223,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 #region ITEM INFO
                 TextBox _;
-                itemInfo.Add(textBoxName = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false) { AcceptMouseInput = false });
+                itemInfo.Add(textBoxName = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 15, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false) { AcceptMouseInput = false });
                 textBoxName.Y = (itemInfo.Height - textBoxName.MeasuredSize.Y) / 2;
 
                 TextBox countTB;
-                itemInfo.Add(countTB = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 20, ITEM_DESCPTION_WIDTH - Height, Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { Y = 3, AcceptMouseInput = false });
-                countTB.X = itemInfo.Width - countTB.Width - 3;
+                itemInfo.Add(countTB = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 15, ITEM_DESCPTION_WIDTH - Height, Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { Y = 3, AcceptMouseInput = false });
+                countTB.X = itemInfo.Width - countTB.Width - 3;                
 
-                itemInfo.Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
+                itemInfo.Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 15, ITEM_DESCPTION_WIDTH - Height, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
+                _.Y = itemInfo.Height - _.Height - 17;
+                _.X = itemInfo.Width - _.Width - 3;
+
+                itemInfo.Add(_ = new TextBox($"{count*price}gp", TrueTypeLoader.EMBEDDED_FONT, 15, ITEM_DESCPTION_WIDTH - Height, Color.Red, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
                 _.Y = itemInfo.Height - _.Height - 3;
                 _.X = itemInfo.Width - _.Width - 3;
                 #endregion
@@ -301,13 +305,13 @@ namespace ClassicUO.Game.UI.Gumps
                 textBoxName.Text = Name;
             }
 
-            protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                base.OnMouseDoubleClick(x, y, button);
+                base.OnMouseUp(x, y, button);
 
                 if (button == MouseButtonType.Left)
                 {
-                    if (Keyboard.Shift)
+                    if (Keyboard.Ctrl)
                     {
                         Dictionary<uint, ushort> theItem = new Dictionary<uint, ushort>
                         {
@@ -331,11 +335,9 @@ namespace ClassicUO.Game.UI.Gumps
                         itemInfo.IsVisible ^= true;
                         purchaseSell.IsVisible ^= true;
                     }
-                }
-
-                return true;
+                }              
             }
-
+         
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 if (MouseIsOver)

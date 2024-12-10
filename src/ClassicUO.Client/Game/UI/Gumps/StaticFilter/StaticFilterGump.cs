@@ -50,12 +50,12 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private ushort? Graphic;
         public List<StaticCustomItens> Walls;
         public int currentPos = 0;
-        private static readonly int defaultColumns = 8;
-        private static readonly int defaultRows = 5;
+        private static readonly int defaultColumns = 12;
+        private static readonly int defaultRows = 3;
         private string Type;
         #endregion
 
-        public StaticFilterGump(GameObject selectedObject) : base(GetWidth(), GetHeight(), 500, 500, 0, 0)
+        public StaticFilterGump(GameObject selectedObject) : base(GetWidth(), GetHeight(), 800, 500, 0, 0)
         {
             CanCloseWithEsc = true;
             AcceptMouseInput = true;
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private void BuildAddStatic()
         {
             NiceButton add;
-            Add(add = new NiceButton(410, 18, 25, 20, ButtonAction.Default, "Add", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
+            Add(add = new NiceButton(this.EndXPos - padding - 35, 18, 25, 20, ButtonAction.Default, "Add", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
             add.SetTooltip("Add iten to static filter.");
             add.MouseUp += (s, e) =>
             {
@@ -210,10 +210,10 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         private void BuildSaveStatic()
         {
-            NiceButton add;
-            Add(add = new NiceButton(440, 18, 50, 20, ButtonAction.Default, "Save", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
-            add.SetTooltip("Save static file.");
-            add.MouseUp += (s, e) =>
+            NiceButton save;
+            Add(save = new NiceButton(this.EndXPos - padding , 18, 50, 20, ButtonAction.Default, "Save", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
+            save.SetTooltip("Save static file.");
+            save.MouseUp += (s, e) =>
             {
                 if (e.Button == MouseButtonType.Left)
                 {
