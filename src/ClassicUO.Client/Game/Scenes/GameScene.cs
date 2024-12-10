@@ -1437,7 +1437,7 @@ namespace ClassicUO.Game.Scenes
                     World.Player,
                     ResGeneral.StoppedFollowing,
                     string.Empty,
-                    0,
+                    70,
                     MessageType.Regular,
                     3,
                     TextType.CLIENT

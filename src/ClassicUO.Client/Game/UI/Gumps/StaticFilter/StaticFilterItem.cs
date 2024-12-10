@@ -5,6 +5,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.Gumps;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,64 +20,64 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
     internal class StaticFilterItem : Control
     {
         private HitBox hit;
-        private bool mousePressedWhenEntered = false;
-        private readonly GameObject objectInfo;
         public readonly Texture2D texture;
         public Rectangle rect;
-        private Rectangle bounds;    
+        private Rectangle bounds;
         public bool ItemGridLocked = false;
-        private readonly int slot;
-        AlphaBlendControl background;   
+        private readonly int _slot;
+        private AlphaBlendControl background;
         public bool Hightlight = false;
         public bool SelectHighlight = false;
-        public StaticFilterItem(ushort graphic, int slot,int size)
+        public ushort Graphic;
+        private Label lblGraphic;
+        private readonly int _size;
+        private readonly StaticFilterSlotManager _manager;
+        public StaticFilterItem(ushort graphic, int slot, int size, StaticFilterSlotManager manager)
         {
             #region VARS
-            this.slot = slot;
-            rect = Client.Game.Arts.GetRealArtBounds(graphic);
+            _manager = manager;
+            _size = size;
+            _slot = slot;
+            Graphic = graphic;
+
             ref readonly var text = ref Client.Game.Arts.GetArt(graphic);
+            rect = Client.Game.Arts.GetRealArtBounds(graphic);                                   
             texture = text.Texture;
             bounds = text.UV;
+            
             #endregion
 
-            Build(size);
+            Build();
         }
-        public StaticFilterItem(SpriteInfo spritInfo, int slot, int size)
-        {
-            #region VARS
-            this.slot = slot;           
-            rect = spritInfo.Texture.Bounds;
-            ref readonly var text = ref spritInfo;
-            texture = text.Texture;
-            bounds = text.UV;
-            #endregion
-
-            Build(size);
-        }
-
-        private void Build(int size)
+        private void Build()
         {
             background = new AlphaBlendControl(0.25f)
             {
-                Width = size,
-                Height = size,
+                Width = _size,
+                Height = _size,
                 Hue = 0x0000
 
             };
-            Width = Height = size;
+            Width = Height = _size;
             Add(background);
 
-            hit = new HitBox(0, 0, size, size, null, 0f);
+            hit = new HitBox(0, 0, _size, _size, null, 0f);
             Add(hit);
+            //GraphicId
+            lblGraphic?.Dispose();
+            lblGraphic = new Label(Graphic.ToString(), true, 0x0481)
+            {
+                X = 1
+            };
+            lblGraphic.Y = Height - lblGraphic.Height;
+            hit.MouseUp += _hit_MouseUp;
         }
-        public void Resize()
+        private void _hit_MouseUp(object sender, MouseEventArgs e)
         {
-            Width = gridItemSize;
-            Height = gridItemSize;
-            hit.Width = gridItemSize;
-            hit.Height = gridItemSize;
-            background.Width = gridItemSize;
-            background.Height = gridItemSize;
+            if (Keyboard.Ctrl)
+            {
+                _manager.RemoveItem(_slot);
+            }
         }
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -98,8 +99,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
             if (texture != null & rect != null)
             {
-                Point originalSize = new Point(hit.Width, hit.Height);
-                Point point = new Point();
+                Point originalSize = new(hit.Width, hit.Height);
+                Point point = new();
                 var scale = ProfileManager.CurrentProfile.GridContainerScale / 100f;
 
                 if (rect.Width < hit.Width)
@@ -119,7 +120,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                         originalSize.X = hit.Width;
                     point.X = (hit.Width >> 1) - (originalSize.X >> 1);
                 }
-
                 if (rect.Height < hit.Height)
                 {
                     if (ProfileManager.CurrentProfile.GridContainerScaleItems)
@@ -145,9 +145,27 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     new Rectangle(x + point.X, y + point.Y + hit.Y, originalSize.X, originalSize.Y),//texture
                     new Rectangle(bounds.X + rect.X, bounds.Y + rect.Y, rect.Width, rect.Height),
                     hueVector
-                );              
+                );
+                lblGraphic?.Draw(batcher, x + lblGraphic.X, y + lblGraphic.Y);
             }
             return true;
+        }
+        public override void Dispose()
+        {
+            lblGraphic.Dispose();
+            background.Dispose();
+            hit.MouseUp -= _hit_MouseUp;
+            hit.Dispose();
+            base.Dispose();
+        }
+        public void Resize()
+        {
+            Width = _size;
+            Height = _size;
+            hit.Width = _size;
+            hit.Height = _size;
+            background.Width = _size;
+            background.Height = _size;
         }
     }
 }

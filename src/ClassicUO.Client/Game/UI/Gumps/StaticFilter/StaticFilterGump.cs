@@ -9,27 +9,28 @@ using ClassicUO.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static ClassicUO.Game.UI.Gumps.CounterBarGump;
 using static ClassicUO.Game.UI.Gumps.GridContainer;
 
 namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
     internal class StaticFilterGump : ResizableGump
     {
-        #region Mannagers
-        private PreferenceManagerBase currentPreferenceMannager;
+        #region Mannagers      
         private readonly PreferenceManagerBase _wallMannager = new PreferenceWallManager();
         private readonly PreferenceManagerBase _doorsMannager = new PreferenceDoorMannager();
         #endregion
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
         private const int TOP_BAR_HEIGHT = 60;
-        private ushort hue = 39;
+        private const ushort HUE = 39;
         #endregion
 
         #region private static vars
         public static int lastX = 100, lastY = 100, lastCorpseX = 100, lastCorpseY = 100;
-        public static int gridItemSize { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainerScale / 100f)); } }
+        private static int _gridItemSize { get { return (int)Math.Round(50 * (ProfileManager.CurrentProfile.GridContainerScale / 100f)); } }
         public static int borderWidth = 4;
+        public static int padding = 18;
         #endregion
 
         #region private readonly vars
@@ -47,8 +48,10 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private GridScrollArea scrollArea;
         public StaticFilterSlotManager filterSlotManager;
         private ushort? Graphic;
-        List<StaticCustomItens> Walls;
-        private int currentPos = 0;
+        public List<StaticCustomItens> Walls;
+        public int currentPos = 0;
+        private static readonly int defaultColumns = 8;
+        private static readonly int defaultRows = 5;
         private string Type;
         #endregion
 
@@ -60,7 +63,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             LoadFiles();
             GumpBuild();
         }
-
         private void LoadFiles()
         {
             Walls = _wallMannager.LoadFile();
@@ -69,6 +71,17 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 if (Walls[i].ToReplaceGraphicArray.Contains(Graphic.Value))
                     currentPos = i;
             }
+        }
+
+        public void ClearItens()
+        {
+            StaticFilterItem[] items = GetControls<StaticFilterItem>(scrollArea);
+            foreach (var item in items)
+            {
+                item.Parent = null;
+                item.Dispose();
+            }
+            UpdateFields();
         }
         public void EnsureSelectedObject(GameObject selectedObject)
         {
@@ -81,7 +94,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     Type = "Door";
             }
         }
-
         #region GumpBuild             
         private void GumpBuild()
         {
@@ -108,28 +120,25 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             AddControls();
             #endregion
 
-            filterSlotManager = new StaticFilterSlotManager(Graphic.Value, scrollArea); //Must come after scroll area         
+            filterSlotManager = new StaticFilterSlotManager(scrollArea, this, _gridItemSize); //Must come after scroll area         
             BuildBorder();
             ResizeWindow(new Microsoft.Xna.Framework.Point(Width, Height));
+            UpdateFields();
         }
         private void BuildPreferences()
         {
-            NiceButton previous;
-            Add(previous = new NiceButton(20, 18, 20, 20, ButtonAction.Default, "<", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: hue));
-            previous.SetTooltip("Previous");
-            previous.MouseUp += (s, e) =>
+            var lblPreferenceName = new Label("Preference:", true, HUE)
             {
-                if (e.Button == MouseButtonType.Left && currentPos > 0)
-                {
-                    currentPos--;
-                }
+                X = padding,
+                Y = padding,
             };
-            preferenceNameTextBox = new StbTextBox(1, 50, 50, true, FontStyle.None, 0x0481)
+            Add(lblPreferenceName);
+            preferenceNameTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, 0x0481)
             {
-                X = previous.X + 30,
-                Y = previous.Y,
+                X = lblPreferenceName.EndXPos + 10,
+                Y = padding,
                 Multiline = false,
-                Width = 50,
+                Width = 80,
                 Height = 20
             };
             preferenceNameTextBox.Add(new AlphaBlendControl(0.5f)
@@ -139,8 +148,18 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 Height = preferenceNameTextBox.Height
             });
 
+            NiceButton previous;
+            Add(previous = new NiceButton(preferenceNameTextBox.EndXPos + 10, 18, 20, 20, ButtonAction.Default, "<", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: HUE));
+            previous.SetTooltip("Previous");
+            previous.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtonType.Left && currentPos > 0)
+                {
+                    currentPos--;
+                }
+            };
             NiceButton next;
-            Add(next = new NiceButton(preferenceNameTextBox.X + 30, 18, 20, 20, ButtonAction.Default, ">", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: hue));
+            Add(next = new NiceButton(previous.EndXPos + 10, 18, 20, 20, ButtonAction.Default, ">", align: Assets.TEXT_ALIGN_TYPE.TS_LEFT, hue: HUE));
             next.SetTooltip("Next");
             next.MouseUp += (s, e) =>
             {
@@ -150,12 +169,18 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 }
             };
 
-            replaceGraphicTextBox = new StbTextBox(1, 50, 50, true, FontStyle.None, 0x0481)
+            var lblReplaceTo = new Label("ReplaceTo:", true, HUE)
             {
-                X = 10,
-                Y = previous.Y + 25,
+                X = next.EndXPos + 20,
+                Y = padding,
+            };
+            Add(lblReplaceTo);
+            replaceGraphicTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, 0x0481)
+            {
+                X = lblReplaceTo.X + 50 + 10,
+                Y = padding,
                 Multiline = false,
-                Width = 50,
+                Width = 80,
                 Height = 20
             };
             replaceGraphicTextBox.Add(new AlphaBlendControl(0.5f)
@@ -168,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private void BuildAddStatic()
         {
             NiceButton add;
-            Add(add = new NiceButton(410, 18, 25, 20, ButtonAction.Default, "Add", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: hue));
+            Add(add = new NiceButton(410, 18, 25, 20, ButtonAction.Default, "Add", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
             add.SetTooltip("Add iten to static filter.");
             add.MouseUp += (s, e) =>
             {
@@ -176,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 {
                     if (!Walls.Any(X => X.Description == preferenceNameTextBox.Text))
                     {
-                        Walls.Add(new StaticCustomItens() { Type = "Wall", Description = preferenceNameTextBox.Text });
+                        Walls.Add(new StaticCustomItens() { Description = preferenceNameTextBox.Text });
                         currentPos = Walls.Count;
                         UpdateFields();
                     }
@@ -186,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private void BuildSaveStatic()
         {
             NiceButton add;
-            Add(add = new NiceButton(440, 18, 50, 20, ButtonAction.Default, "Save", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: hue));
+            Add(add = new NiceButton(440, 18, 50, 20, ButtonAction.Default, "Save", align: Assets.TEXT_ALIGN_TYPE.TS_CENTER, hue: HUE));
             add.SetTooltip("Save static file.");
             add.MouseUp += (s, e) =>
             {
@@ -199,23 +224,29 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         private void BuildGraphicText()
         {
-            graphicTextBox = new StbTextBox(1, 50, 100, true, FontStyle.None, 0x0481)
+            var lblReplaceTo = new Label("ToReplace:", true, HUE)
             {
-                X = borderWidth,
-                Y = borderWidth,
+                X = padding,
+                Y = 44,
+            };
+            Add(lblReplaceTo);
+            graphicTextBox = new StbTextBox(1, 50, 80, true, FontStyle.None, 0x0481)
+            {
+                X = lblReplaceTo.EndXPos + 10,
+                Y = 44,
                 Multiline = false,
-                Width = 100,
+                Width = 80,
                 Height = 20
             };
             graphicTextBox.KeyUp += (sender, e) =>
             {
-                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_KP_ENTER)
+                if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_RETURN)
                 {
                     if (!string.IsNullOrEmpty(graphicTextBox.Text))
                     {
                         var graphic = (ushort)Convert.ToInt32(graphicTextBox.Text);
-                        filterSlotManager.AddItem(graphic);
-                        Walls[currentPos].ToReplaceGraphicArray.Add(graphic);
+                        if (!Walls[currentPos].ToReplaceGraphicArray.Contains(graphic))
+                            Walls[currentPos].ToReplaceGraphicArray.Add(graphic);
                         UpdateFields();
                     }
                 }
@@ -232,7 +263,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             if (InvalidateContents && !IsDisposed && IsVisible)
             {
                 UpdateFields();
-                GridContainerManager.UpdateAllContainers();
             }
         }
         private void AddControls()
@@ -240,7 +270,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             Add(background);
             Add(backgroundTexture);
             Add(preferenceNameTextBox);
-            //Add(replaceGraphicTextBox);
+            Add(replaceGraphicTextBox);
             Add(graphicTextBox);
             Add(scrollArea);
         }
@@ -276,18 +306,16 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         private void UpdateUIPositions()
         {
-            background.X = borderWidth;
-            background.Y = borderWidth;
+            background.X = padding;
+            background.Y = padding;
             scrollArea.X = background.X;
             scrollArea.Y = TOP_BAR_HEIGHT + background.Y;
-            graphicTextBox.Y = borderWidth;
-            graphicTextBox.X = borderWidth;
             backgroundTexture.X = background.X;
             backgroundTexture.Y = background.Y;
-            backgroundTexture.Width = Width - borderWidth * 2;
-            backgroundTexture.Height = Height - borderWidth * 2;
-            background.Width = Width - borderWidth * 2;
-            background.Height = Height - borderWidth * 2;
+            backgroundTexture.Width = Width - padding * 2;
+            backgroundTexture.Height = Height - padding * 2;
+            background.Width = Width - padding * 2;
+            background.Height = Height - padding * 2;
             scrollArea.Width = background.Width;
             scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
         }
@@ -306,73 +334,56 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         {
             background = new AlphaBlendControl()
             {
-                Width = Width - borderWidth * 2,
-                Height = Height - borderWidth * 2,
-                X = borderWidth,
-                Y = borderWidth,
+                Width = Width - padding * 2,
+                Height = Height - padding * 2,
+                X = padding,
+                Y = padding,
                 Alpha = (float)ProfileManager.CurrentProfile.ContainerOpacity / 100,
                 Hue = ProfileManager.CurrentProfile.AltGridContainerBackgroundHue
             };
 
             backgroundTexture = new GumpPicTiled(0);
         }
-
-        #endregion GumpBuild
-        public override void Update()
-        {
-            base.Update();
-
-            if (IsDisposed)
-                return;
-
-            if (lastWidth != Width || lastHeight != Height || lastGridItemScale != gridItemSize)
-            {
-                lastGridItemScale = gridItemSize;
-                background.Width = Width - borderWidth * 2;
-                background.Height = Height - borderWidth * 2;
-                scrollArea.Width = background.Width;
-                scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
-                lastHeight = Height;
-                lastWidth = Width;
-                graphicTextBox.Width = Math.Min(Width - borderWidth * 2, 150);
-                backgroundTexture.Width = background.Width;
-                backgroundTexture.Height = background.Height;
-                backgroundTexture.Alpha = background.Alpha;
-                backgroundTexture.Hue = background.Hue;
-
-                RequestUpdateContents();
-            }
-        }
+        #endregion GumpBuild       
         private static int GetWidth(int columns = -1)
         {
             if (columns < 0)
-                columns = ProfileManager.CurrentProfile.Grid_DefaultColumns;
+                columns = defaultColumns;
             return borderWidth * 2     //The borders around the container, one on the left and one on the right
             + 15                   //The width of the scroll bar
-            + gridItemSize * columns //How many items to fit in left to right
+            + _gridItemSize * columns //How many items to fit in left to right
             + X_SPACING * columns;      //Spacing between each grid item(x columns)
         }
         private static int GetHeight(int rows = -1)
         {
             if (rows < 0)
-                rows = ProfileManager.CurrentProfile.Grid_DefaultRows;
-            return TOP_BAR_HEIGHT + borderWidth * 2 + (gridItemSize + Y_SPACING) * rows;
+                rows = defaultRows;
+            return TOP_BAR_HEIGHT + borderWidth * 2 + (_gridItemSize + Y_SPACING) * rows;
         }
+
         public void UpdateFields()
         {
-            if (Walls.Count <= currentPos)
+            if (currentPos <= Walls.Count)
             {
-                filterSlotManager.gridSlots.Clear();
-                var wall = Walls[currentPos];
-                preferenceNameTextBox.Text = wall.Description;
-
-                foreach (var graphic in wall.ToReplaceGraphicArray)
-                {
-                    filterSlotManager.AddItem(graphic);
-                }
+                filterSlotManager.GridSlots.Clear();
+                filterSlotManager.slots = 0;
+                EnsureItens();
             }
             filterSlotManager.SetGridPositions();
         }
+
+        private void EnsureItens()
+        {
+            var wall = Walls[currentPos];
+            preferenceNameTextBox.Text = wall.Description;
+            replaceGraphicTextBox.Text = Convert.ToString(wall.ReplaceToGraphic);
+
+            foreach (var graphic in wall.ToReplaceGraphicArray)
+            {
+                filterSlotManager.AddItem(graphic);
+            }
+        }
+
         private void ScrollArea_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && scrollArea.MouseIsOver)
@@ -389,6 +400,31 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             else if (e.Button == MouseButtonType.Right)
             {
                 InvokeMouseCloseGumpWithRClick();
+            }
+        }
+        public override void Update()
+        {
+            base.Update();
+
+            if (IsDisposed)
+                return;
+
+            if (lastWidth != Width || lastHeight != Height || lastGridItemScale != _gridItemSize)
+            {
+                lastGridItemScale = _gridItemSize;
+                background.Width = Width - borderWidth * 2;
+                background.Height = Height - borderWidth * 2;
+                scrollArea.Width = background.Width;
+                scrollArea.Height = background.Height - TOP_BAR_HEIGHT;
+                lastHeight = Height;
+                lastWidth = Width;
+                graphicTextBox.Width = Math.Min(Width - borderWidth * 2, 150);
+                backgroundTexture.Width = background.Width;
+                backgroundTexture.Height = background.Height;
+                backgroundTexture.Alpha = background.Alpha;
+                backgroundTexture.Hue = background.Hue;
+
+                RequestUpdateContents();
             }
         }
         public override void Dispose()

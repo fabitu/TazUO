@@ -7,8 +7,10 @@ using ClassicUO.Input;
 using ClassicUO.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,7 +21,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private readonly ushort? _graphic;
 
         #region Mannagers
-        private PreferenceManagerBase currentPreferenceMannager;
+        private static PreferenceManagerBase currentPreferenceMannager;
         private readonly PreferenceManagerBase _wallMannager = new PreferenceWallManager();
         private readonly PreferenceManagerBase _doorsMannager = new PreferenceDoorMannager();
         #endregion
@@ -41,20 +43,27 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         public StaticFilterFakeGump(GameObject seletedObject) : base(0, 0)
         {
             _seletedObject = seletedObject;
-            if (SelectedObject.Object is GameObject gameObject)
+            if (SelectedObject.Object is GameObject gameObject && SelectedObject.Object is Static st)
             {
                 _graphic = gameObject.Graphic;
+                if (st.ItemData.IsWall)
+                    currentPreferenceMannager = _wallMannager;
+                else if (st.ItemData.IsDoor)
+                    currentPreferenceMannager = _doorsMannager;
+
+                if (st.ItemData.IsWall || st.ItemData.IsDoor)
+                {
+                    EnsureContextMenu();
+                    ShowContextMenu();
+                }
             }
-
-            EnsureContextMenu();
-            ShowContextMenu();
         }
-
         private void EnsureContextMenu()
         {
+            ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl();
             ContextMenu.Add("Open", Open);
-            if (_graphic != null) { ContextMenu.Add("Add", AddItem); }
+            if (_graphic != null) { ContextMenu.Add(ResGumps.Add, AddItem); }
             if (_graphic != null) { ContextMenu.Add(ResGumps.Remove, RemoveItem); }
         }
 
@@ -85,16 +94,14 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 staticFilterGump.BringOnTop();
             }
         }
-
         private void AddItem()
         {
             if (_graphic != null)
             {
-                currentPreferenceMannager.RemoveGraphic(_graphic.Value);
+                currentPreferenceMannager.AddGraphic(null, _graphic.Value);
                 currentPreferenceMannager.ReloadPreferences();
             }
         }
-
         private void RemoveItem()
         {
             if (_graphic != null)

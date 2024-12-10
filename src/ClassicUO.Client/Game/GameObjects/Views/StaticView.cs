@@ -94,16 +94,10 @@ namespace ClassicUO.Game.GameObjects
             ReplaceWall(ref graphic);
             //ReplaceDoor(ref graphic);
 
-            DrawStaticAnimated(
-                batcher,
-                graphic,
-                posX,
-                posY,
-                hueVec,
-                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
-                depth,
-                ProfileManager.CurrentProfile.AnimatedWaterEffect && ItemData.IsWet
-            );
+            DrawStaticAnimated(batcher, graphic, posX, posY, hueVec,
+                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && 
+                (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
+                depth, ProfileManager.CurrentProfile.AnimatedWaterEffect && ItemData.IsWet);
 
             if (ItemData.IsLight)
             {
@@ -116,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
         //EP: ReplaceDoor
         private static void ReplaceDoor(ref ushort graphic)
         {
-            if (ProfileManager.CurrentProfile.ChangeWallAndDoors && ProfileManager.CurrentProfile.EnableStaticFilter)
+            if (ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 var _graphic = graphic;
                 var replaceGraphic = Constants.WALL_REPLACE_GRAPHIC;
@@ -131,7 +125,7 @@ namespace ClassicUO.Game.GameObjects
         //EP: ReplaceWall
         private static void ReplaceWall(ref ushort graphic)
         {
-            if (ProfileManager.CurrentProfile.ChangeWallAndDoors && ProfileManager.CurrentProfile.EnableStaticFilter)
+            if (ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 var _graphic = graphic;
                 var customReplaceWall = StaticFilters.WallTiles.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
@@ -145,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
         {
             bool isTree = StaticFilters.IsTree(graphic, out int treeType);
 
-            if (isTree && ProfileManager.CurrentProfile.TreeToStumps && ProfileManager.CurrentProfile.EnableStaticFilter)
+            if (isTree && ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 if (treeType == 0)
                     graphic = Constants.TREE_STUMPED_REPLACE_GRAPHIC;

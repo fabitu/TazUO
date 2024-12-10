@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Controls
         protected Control(Control parent = null)
         {
             Parent = parent;
-            Children = new List<Control>();
+            Children = [];
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
@@ -169,6 +169,9 @@ namespace ClassicUO.Game.UI.Controls
         public int ScreenCoordinateX => ParentX + X;
 
         public int ScreenCoordinateY => ParentY + Y;
+
+        public int EndXPos => X + Width;
+        public int EndYPos => Y + Height;
 
         public ContextMenuControl ContextMenu { get; set; }
 
@@ -321,7 +324,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Children.Count != 0)
             {
-                List<Control> removalList = new List<Control>(); ;
+                List<Control> removalList = [];
                 int w = 0, h = 0;
 
                 for (int i = 0; i < Children.Count; i++)
@@ -402,7 +405,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Children.Count != 0)
             {
-                List<Control> removalList = new List<Control>(); ;
+                List<Control> removalList = [];
 
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -704,11 +707,15 @@ namespace ClassicUO.Game.UI.Controls
             {
                 c.Dispose();
             }
-        }
+        }     
 
         public T[] GetControls<T>() where T : Control
         {
             return Children.OfType<T>().Where(s => !s.IsDisposed).ToArray();
+        }
+        public T[] GetControls<T>(Control control) where T : Control
+        {            
+            return control.Children.OfType<T>().Where(s => !s.IsDisposed).ToArray();
         }
 
         public IEnumerable<T> FindControls<T>() where T : Control
@@ -771,7 +778,7 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             bool result = OnMouseDoubleClick(x, y, button);
 
-            MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(x, y, button);
+            MouseDoubleClickEventArgs arg = new(x, y, button);
             MouseDoubleClick.Raise(arg, this);
             result |= arg.Result;
 
@@ -786,14 +793,14 @@ namespace ClassicUO.Game.UI.Controls
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyDown(key, mod);
-            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Down);
+            KeyboardEventArgs arg = new(key, mod, KeyboardEventType.Down);
             KeyDown?.Raise(arg);
         }
 
         public void InvokeKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyUp(key, mod);
-            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Up);
+            KeyboardEventArgs arg = new(key, mod, KeyboardEventType.Up);
             KeyUp?.Raise(arg);
         }
 

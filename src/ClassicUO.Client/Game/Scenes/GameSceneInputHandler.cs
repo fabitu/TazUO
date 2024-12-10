@@ -874,7 +874,7 @@ namespace ClassicUO.Game.Scenes
                                 World.Player,
                                 ResGeneral.NowFollowing,
                                 string.Empty,
-                                0,
+                                70,
                                 MessageType.Regular,
                                 3,
                                 TextType.CLIENT

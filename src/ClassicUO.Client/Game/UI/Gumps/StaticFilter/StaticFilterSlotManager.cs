@@ -1,130 +1,80 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Configuration;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
-using ClassicUO.Renderer.Lights;
+﻿using ClassicUO.Game.UI.Controls;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using static ClassicUO.Game.UI.Gumps.GridContainer;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
-    internal class StaticFilterSlotManager
+    internal class StaticFilterSlotManager(Control controlArea, StaticFilterGump parent, int gridItemSize)
     {
         #region CONSTANTS
         private const int X_SPACING = 1, Y_SPACING = 1;
-        private const int TOP_BAR_HEIGHT = 60;
+        //private const int TOP_BAR_HEIGHT = 60;
         #endregion
 
-        public Dictionary<int, StaticFilterItem> gridSlots = [];    
-        private List<GameObjectInfo> gridContents;
-        private int amount = 125;
-        private Control area;
-        private Dictionary<int, uint> itemPositions = new();
-        private List<uint> itemLocks = new();
-        private static int slots = 0;
+        private readonly Control Area = controlArea;
+        public int slots = 0;
+        private readonly int GridItemSize = gridItemSize;
+        private readonly StaticFilterGump parent = parent;
+        public Dictionary<int, StaticFilterItem> GridSlots = [];
 
-        public Dictionary<int, StaticFilterItem> GridSlots { get { return gridSlots; } }
-        public List<GameObjectInfo> ContainerContents { get { return gridContents; } }
-        public Dictionary<int, uint> ItemPositions { get { return itemPositions; } }
-        public StaticFilterSlotManager(ushort? graphic, Control controlArea)
-        {
-            area = controlArea;
-            if (graphic != null)
-                AddItem(graphic.Value);           
-        }        
         public void AddItem(ushort graphic)
         {
-            StaticFilterItem GI = new(graphic, slots, gridItemSize);
+            StaticFilterItem GI = new(graphic, slots, GridItemSize, this);
             if (GI.texture == null)
                 return;
-            gridSlots.Add(slots, GI);
-            area.Add(GI);
+            GridSlots.Add(slots, GI);
+            Area.Add(GI);
             slots++;
-            SetGridPositions();
         }
-        
-        public StaticFilterItem FindItem(uint serial)
+        public void RemoveItem(int slot)
         {
-            foreach (var slot in gridSlots)
-                if (slot.Value.LocalSerial == serial)
-                    return slot.Value;
-            return null;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="search"></param>
-        /// <returns>List of items matching the search result, or all items if search is blank/profile does has hide search mode disabled</returns>
-        public List<GameObjectInfo> SearchResults(string search)
-        {
-            if (search != "")
+            try
             {
-                if (ProfileManager.CurrentProfile.GridContainerSearchMode == 0) //Hide search mode
+                for (int i = 0; i < GridSlots.Count; i++)
                 {
-                    List<GameObjectInfo> filteredContents = new();
-                    foreach (GameObjectInfo i in gridContents)
+                    if (i == slot)
                     {
-                        if (SearchItemNameAndProps(search, i))
-                            filteredContents.Add(i);
+                        if (parent.Walls[parent.currentPos].ToReplaceGraphicArray.Contains(GridSlots[i].Graphic))
+                            parent.Walls[parent.currentPos].ToReplaceGraphicArray.Remove(GridSlots[i].Graphic);
                     }
-                    return filteredContents;
+                    if (i > slot && i > 0)
+                    {
+                        GridSlots[i - 1] = GridSlots[i];
+                    }
+                    if (i == GridSlots.Count)
+                    {
+                        Area.Remove(GridSlots[i]);
+                        GridSlots[i].Dispose();
+                        GridSlots.Remove(i);
+                        slots--;
+                    }                   
                 }
+                parent.ClearItens();
+                SetGridPositions();
             }
-            return gridContents;
-        }
-
-        private bool SearchItemNameAndProps(string search, GameObjectInfo item)
-        {
-            if (item == null)
-                return false;
-
-            if (World.OPL.TryGetNameAndData(item.Graphic, out string name, out string data))
+            catch
             {
-                if (name != null && name.ToLower().Contains(search.ToLower()))
-                    return true;
-                if (data != null)
-                    if (data.ToLower().Contains(search.ToLower()))
-                        return true;
             }
-            else
-            {
-                if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
-                    return true;
-
-                //if (item.ItemData.Name.ToLower().Contains(search.ToLower()))
-                //    return true;
-            }
-
-            return false;
         }
         /// <summary>
         /// Set the visual grid items to the current GridSlots dict
         /// </summary>
         public void SetGridPositions()
         {
+            int i = 0;
             int x = X_SPACING, y = 0;
-            foreach (var slot in gridSlots)
+            foreach (var slot in GridSlots)
             {
-                if (!slot.Value.IsVisible)
-                {
-                    continue;
-                }
-                if (x + gridItemSize >= area.Width - 14) //14 is the scroll bar width
+                if (x + GridItemSize >= Area.Width - 14) //14 is the scroll bar width
                 {
                     x = X_SPACING;
-                    y += gridItemSize + Y_SPACING;
+                    y += GridItemSize + Y_SPACING;
                 }
                 slot.Value.X = x;
                 slot.Value.Y = y;
                 slot.Value.Resize();
-                x += gridItemSize + X_SPACING;
+                x += GridItemSize + X_SPACING;
+                i++;
             }
-        }      
-
-        public int hcount = 0;
+        }
     }
 }

@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Scenes
     {
         private static GameObject[] _foliages = new GameObject[100];
         private static readonly TreeUnion[] _treeInfos =
-        {
+        [
             new TreeUnion(0x0D45, 0x0D4C),
             new TreeUnion(0x0D5C, 0x0D62),
             new TreeUnion(0x0D73, 0x0D79),
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Scenes
             new TreeUnion(0x0D63, 0x0D69),
             new TreeUnion(0x0D7A, 0x0D7F),
             new TreeUnion(0x0D8C, 0x0D90)
-        };
+        ];
 
         private sbyte _maxGroundZ;
         public int _maxZ { get; set; }
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (!(obj2 is Land))
+                            if (obj2 is not Land)
                             {
                                 ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[
                                     obj2.Graphic
@@ -414,7 +414,7 @@ namespace ClassicUO.Game.Scenes
                 _maxZ = World.Player.Z + 15;
             }
 
-            if (obj.Z >= _maxZ)
+            if (obj.Z >= _maxZ && obj is not Mobile _)
             {
                 bool changed;
 
@@ -474,7 +474,7 @@ namespace ClassicUO.Game.Scenes
             if (ProfileManager.CurrentProfile.UseCircleOfTransparency && obj.TransparentTest(maxZ))
             {
                 int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 0;
-                Vector2 pos = new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y - 44);
+                Vector2 pos = new(obj.RealScreenPosition.X, obj.RealScreenPosition.Y - 44);
                 Vector2.Distance(ref playerPos, ref pos, out float dist);
 
                 if (dist <= maxDist)
@@ -1271,16 +1271,10 @@ namespace ClassicUO.Game.Scenes
             UpdateMaxDrawZ();
         }
 
-        private struct TreeUnion
+        private readonly struct TreeUnion(ushort start, ushort end)
         {
-            public TreeUnion(ushort start, ushort end)
-            {
-                Start = start;
-                End = end;
-            }
-
-            public readonly ushort Start;
-            public readonly ushort End;
+            public readonly ushort Start = start;
+            public readonly ushort End = end;
         }
     }
 }

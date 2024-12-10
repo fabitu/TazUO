@@ -17,6 +17,7 @@ namespace ClassicUO.Game.Data.Preferences
         protected ushort defaultReplaceGraphic;
         protected List<ushort> defaultReplaceGraphicList;
         protected List<StaticCustomItens> staticCustomItens;
+        JsonSerializerOptions serializerOptions = new JsonSerializerOptions() { IncludeFields = true };
 
         public PreferenceManagerBase(string fileName)
         {
@@ -27,7 +28,6 @@ namespace ClassicUO.Game.Data.Preferences
         {
             return ReadFile();
         }
-
         public List<StaticCustomItens> SavePreferences(List<StaticCustomItens> preferences)
         {
             try
@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Data.Preferences
                 var customItens = ReadFile();
                 customItens = preferences;
                 SaveFile(customItens);
-                return ReadFile();                
+                return ReadFile();
             }
             catch (Exception ex)
             {
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Data.Preferences
                 var customItens = ReadFile();
                 if (customItens != null)
                 {
-                    var customItem = customItens.FirstOrDefault(x => x.Type.Equals(updatedItem.Type, StringComparison.OrdinalIgnoreCase) && x.Description.Equals(updatedItem.Description, StringComparison.OrdinalIgnoreCase));
+                    var customItem = customItens.FirstOrDefault(x => x.Description.Equals(updatedItem.Description, StringComparison.OrdinalIgnoreCase));
                     customItem = updatedItem;
                     SaveFile(customItens);
                     return ReadFile();
@@ -86,9 +86,16 @@ namespace ClassicUO.Game.Data.Preferences
         {
             try
             {
+                StaticCustomItens customItem;
                 List<StaticCustomItens> customItens = ReadFile();
-
-                var customItem = customItens.FirstOrDefault(x => x.Type.Equals(addItem.Type, StringComparison.OrdinalIgnoreCase) && x.Description.Equals(addItem.Description, StringComparison.OrdinalIgnoreCase));
+                if (addItem == null)
+                {
+                    customItem = customItens.FirstOrDefault();
+                }
+                else
+                {
+                    customItem = customItens.FirstOrDefault(x => x.Description.Equals(addItem.Description, StringComparison.OrdinalIgnoreCase));
+                }
                 if (customItem != null)
                 {
                     if (customItem != null && !customItem.ToReplaceGraphicArray.Contains(graphic))
@@ -114,7 +121,7 @@ namespace ClassicUO.Game.Data.Preferences
             try
             {
                 var content = File.ReadAllText(filePath);
-                var customItens = JsonSerializer.Deserialize<List<StaticCustomItens>>(content);
+                var customItens = JsonSerializer.Deserialize<List<StaticCustomItens>>(content, serializerOptions);
 
                 foreach (var itemList in customItens)
                 {
@@ -131,17 +138,23 @@ namespace ClassicUO.Game.Data.Preferences
         }
         private void CreateDefaultFile()
         {
-            List<StaticCustomItens> replaceItem = [];
-
-            replaceItem.Add(new StaticCustomItens()
+            try
             {
-                Description = "Default",
-                ReplaceToGraphic = defaultReplaceGraphic,
-                ToReplaceGraphicArray = defaultReplaceGraphicList
-            });
+                List<StaticCustomItens> replaceItem = [];
 
-            var jsonString = JsonSerializer.Serialize(replaceItem);
-            File.WriteAllText(filePath, jsonString);
+                replaceItem.Add(new StaticCustomItens()
+                {
+                    Description = "Default",
+                    ReplaceToGraphic = defaultReplaceGraphic,
+                    ToReplaceGraphicArray = defaultReplaceGraphicList
+                });
+                SaveFile(replaceItem);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"File {filePath} is Wrong. {ex.Message}");               
+            }       
+           
         }
         private List<StaticCustomItens> ReadFile()
         {
@@ -152,7 +165,7 @@ namespace ClassicUO.Game.Data.Preferences
                     CreateDefaultFile();
                 }
                 var content = File.ReadAllText(filePath);
-                var result = JsonSerializer.Deserialize<List<StaticCustomItens>>(content);
+                var result = JsonSerializer.Deserialize<List<StaticCustomItens>>(content, serializerOptions);
                 return result;
             }
             catch (Exception ex)
@@ -169,8 +182,10 @@ namespace ClassicUO.Game.Data.Preferences
                 {
                     CreateDefaultFile();
                 }
-                string content = JsonSerializer.Serialize(customItens);
+
+                string content = JsonSerializer.Serialize<List<StaticCustomItens>>(customItens, serializerOptions);
                 File.WriteAllText(filePath, content);
+                ReloadPreferences();
             }
             catch (Exception ex)
             {
@@ -179,9 +194,17 @@ namespace ClassicUO.Game.Data.Preferences
         }
         public void ReloadPreferences()
         {
-            Client.LoadTileData();
-            OptionsGump optionsGump = new();
-            optionsGump.Apply();
+            try
+            {
+                Client.LoadTileData();
+                OptionsGump optionsGump = new();
+                optionsGump.Apply();
+            }
+            catch
+            {
+                
+            }
+            
         }
     }
 }

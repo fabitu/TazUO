@@ -6,13 +6,11 @@ namespace ClassicUO.Game.Data
     public class StaticCustomItens
     {
         [JsonPropertyOrder(0)]
-        public string Type { get; set; }
-        [JsonPropertyOrder(1)]
         public string Description { get; set; }
-        [JsonPropertyOrder(2)]        
+        [JsonPropertyOrder(1)]        
         public ushort ReplaceToGraphic { get; set; }
-        [JsonPropertyOrder(3)]
-        public List<ushort> ToReplaceGraphicArray = [];
+        [JsonPropertyOrder(2)]
+        public List<ushort> ToReplaceGraphicArray = new List<ushort>();
     }
     
 }

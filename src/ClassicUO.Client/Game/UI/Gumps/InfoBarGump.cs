@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly AlphaBlendControl _background;
 
-        private readonly List<InfoBarControl> _infobarControls = new List<InfoBarControl>();
+        private readonly List<InfoBarControl> _infobarControls = [];
         private long _refreshTime;
 
         public override bool IsLocked => _isLocked;
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                InfoBarControl info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                InfoBarControl info = new(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
 
                 _infobarControls.Add(info);
                 Add(info);
@@ -366,7 +366,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SelectedObject.Object is GameObject gameObject)
                 {
-                    sb.Append($" Graphic: 0x0{gameObject.Graphic.ToString("X")}/{gameObject.Graphic.ToString()} ");
+                    sb.Append($" Graphic: 0x0{gameObject.Graphic:X}/{gameObject.Graphic} ");
                     sb.Append($" X:{gameObject.X} Y:{gameObject.Y} Z:{gameObject.Z} ");                    
                 }
 
