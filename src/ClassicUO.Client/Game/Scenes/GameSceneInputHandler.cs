@@ -445,10 +445,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool OnLeftMouseDown()
         {
-            if (
-                UIManager.PopupMenu != null
-                && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
-            )
+            if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
             {
                 UIManager.ShowGamePopup(null);
             }
@@ -794,7 +791,7 @@ namespace ClassicUO.Game.Scenes
                                     break;
                             }
                         }
-                        break;                   
+                        break;
                 }
             }
             else
@@ -827,6 +824,8 @@ namespace ClassicUO.Game.Scenes
                             TextType.CLIENT
                         );
 
+                        //EP: Click Name
+                        name = $"{name} \n/c[green]Graphic:{st.Graphic} \n/c[Yellow]X:{st.X} Y:{st.Y} \n/c[red]Distance:{st.Distance}";
                         obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TextType.CLIENT);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize != 1)
@@ -856,7 +855,8 @@ namespace ClassicUO.Game.Scenes
                             3,
                             TextType.CLIENT
                         );
-
+                        //EP: Click Name
+                        name = $"{name} \n/c[green]Graphic:{multi.Graphic} \n/c[Yellow]X:{multi.X} Y:{multi.Y} \n/c[red]Distance:{multi.Distance}";
                         obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TextType.CLIENT);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -1330,10 +1330,10 @@ namespace ClassicUO.Game.Scenes
             {
                 ProfileManager.CurrentProfile.EnableStaticFilter = !ProfileManager.CurrentProfile.EnableStaticFilter;
                 GameActions.Print($"Static Filter {ProfileManager.CurrentProfile.EnableStaticFilter}", 32);
-                for (int i = 0; i < 300; i++)
-                {
-                    GameActions.Log($"{i}-{(ushort)i}", (ushort)i);
-                }
+                //for (int i = 0; i < 300; i++)
+                //{
+                //    GameActions.Log($"{i}-{(ushort)i}", (ushort)i);
+                //}
             }
 
             //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)

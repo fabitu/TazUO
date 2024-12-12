@@ -405,7 +405,7 @@ namespace ClassicUO.Game.Data
             if (ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 var _graphic = graphic;
-                var customReplace = StaticFilters.CustomDoors.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
+                var customReplace = StaticFilters.CustomDoors?.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
                 if (customReplace != null)
                     graphic = customReplace.ReplaceToGraphic;
             }
@@ -417,7 +417,7 @@ namespace ClassicUO.Game.Data
             if (ProfileManager.CurrentProfile.EnableStaticFilter)
             {
                 var _graphic = graphic;
-                var customReplace = StaticFilters.CustomWalls.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
+                var customReplace = StaticFilters.CustomWalls?.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
                 if (customReplace != null)
                     graphic = customReplace.ReplaceToGraphic;
             }

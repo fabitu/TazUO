@@ -571,7 +571,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 RenderedText h = RenderedText.Create
                 (
-                    $"{time:t} ",
+                    $"{time:HH:hh:mm} ",
                     1150,
                     1,
                     true,
