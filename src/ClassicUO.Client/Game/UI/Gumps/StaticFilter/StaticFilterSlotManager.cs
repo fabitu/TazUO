@@ -34,8 +34,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 {
                     if (i == slot)
                     {
-                        if (parent.Walls[parent.currentPos].ToReplaceGraphicArray.Contains(GridSlots[i].Graphic))
-                            parent.Walls[parent.currentPos].ToReplaceGraphicArray.Remove(GridSlots[i].Graphic);
+                        if (parent.currentCustomItens[parent.currentPos].ToReplaceGraphicArray.Contains(GridSlots[i].Graphic))
+                            parent.currentCustomItens[parent.currentPos].ToReplaceGraphicArray.Remove(GridSlots[i].Graphic);
                     }
                     if (i > slot && i > 0)
                     {

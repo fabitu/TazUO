@@ -37,6 +37,8 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using System.Drawing;
+using ClassicUO.Game.Data;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -200,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     batcher.Draw(artInfo.Texture, new Vector2(x, y), artInfo.UV, hueVector);
                 }
-
+                //StaticFilters.ReplaceWall(ref _graphic);
                 return base.Draw(batcher, x, y);
             }
         }

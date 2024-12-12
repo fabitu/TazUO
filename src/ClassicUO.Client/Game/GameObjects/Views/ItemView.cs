@@ -87,8 +87,9 @@ namespace ClassicUO.Game.GameObjects
             ushort hue = Hue;
             ushort graphic = DisplayedGraphic;
             bool partial = ItemData.IsPartialHue;
-            if (ProfileManager.CurrentProfile.AutoAvoidObstacules) {
-                if  (StaticFilters.IsHumanAndMonster(graphic))
+            if (ProfileManager.CurrentProfile.AutoAvoidObstacules)
+            {
+                if (StaticFilters.IsHumanAndMonster(graphic))
                 {
                     if (StaticFilters.IsOutStamina())
                     {
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         TileDataLoader.Instance.StaticData[Graphic].SetImpassable(false);
                     }
-                        
+
                 }
             }
 
@@ -144,18 +145,12 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (
-                ProfileManager.CurrentProfile.HighlightGameObjects
-                && ReferenceEquals(SelectedObject.Object, this)
-            )
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.Object, this))
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
             }
-            else if (
-                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
-                && Distance > World.ClientViewRange
-            )
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
@@ -178,17 +173,14 @@ namespace ClassicUO.Game.GameObjects
             }
 
             hueVec = ShaderHueTranslator.GetHueVector(hue, partial, alpha);
-
+            StaticFilters.ReplaceWall(ref graphic);
+            StaticFilters.ReplaceDoor(ref graphic);
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
                 DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, hueVec, false, depth);
             }
 
-            if (
-                !SerialHelper.IsValid(Serial)
-                && IsMulti
-                && TargetManager.TargetingState == CursorTarget.MultiPlacement
-            )
+            if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 hueVec.Z = 0.5f;
             }

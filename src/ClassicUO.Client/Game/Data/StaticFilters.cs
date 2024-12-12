@@ -31,11 +31,13 @@
 #endregion
 
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data.Preferences;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.Data
@@ -57,8 +59,8 @@ namespace ClassicUO.Game.Data
 
         public static List<ushort> CaveTiles = [];
         public static List<ushort> TreeTiles = [];
-        public static List<StaticCustomItens> WallTiles = [];
-        public static List<StaticCustomItens> Doors = [];
+        public static List<StaticCustomItens> CustomWalls = [];
+        public static List<StaticCustomItens> CustomDoors = [];
         public static PreferenceManagerBase PreferencesWallMannager = new PreferenceWallManager();
         public static PreferenceManagerBase PreferencesDoorMannager = new PreferenceDoorMannager();
         public static string DirectoryPath
@@ -79,8 +81,8 @@ namespace ClassicUO.Game.Data
             LoadCaveTiles();
             LoadVegetationTiles();
             LoadTreesTiles();
-            WallTiles = PreferencesWallMannager.LoadFile();
-            Doors = PreferencesDoorMannager.LoadFile();
+            CustomWalls = PreferencesWallMannager.LoadFile();
+            CustomDoors = PreferencesDoorMannager.LoadFile();
         }
 
         private static string EnsureDirectoryPath()
@@ -378,6 +380,46 @@ namespace ClassicUO.Game.Data
 
                 default:
                     return false;
+            }
+        }
+
+
+        //EP: ReplaceTree
+        public static bool ReplaceTree(ref ushort graphic)
+        {
+            bool isTree = StaticFilters.IsTree(graphic, out int treeType);
+
+            if (isTree && ProfileManager.CurrentProfile.EnableStaticFilter)
+            {
+                if (treeType == 0)
+                    graphic = Constants.TREE_STUMPED_REPLACE_GRAPHIC;
+                else
+                    graphic = Constants.TREE_REPLACE_GRAPHIC;
+            }
+
+            return isTree;
+        }
+        //EP: ReplaceDoor
+        public static void ReplaceDoor(ref ushort graphic)
+        {
+            if (ProfileManager.CurrentProfile.EnableStaticFilter)
+            {
+                var _graphic = graphic;
+                var customReplace = StaticFilters.CustomDoors.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
+                if (customReplace != null)
+                    graphic = customReplace.ReplaceToGraphic;
+            }
+        }
+
+        //EP: ReplaceWall
+        public static void ReplaceWall(ref ushort graphic)
+        {
+            if (ProfileManager.CurrentProfile.EnableStaticFilter)
+            {
+                var _graphic = graphic;
+                var customReplace = StaticFilters.CustomWalls.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_graphic));
+                if (customReplace != null)
+                    graphic = customReplace.ReplaceToGraphic;
             }
         }
     }

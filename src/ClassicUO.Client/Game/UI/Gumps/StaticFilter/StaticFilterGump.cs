@@ -46,7 +46,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         private GridScrollArea scrollArea;
         public StaticFilterSlotManager filterSlotManager;
         private ushort? Graphic;
-        public List<StaticCustomItens> Walls;
+        public List<StaticCustomItens> currentCustomItens;
+        public PreferenceManagerBase preferenceManager;
         public int currentPos = 0;
         private static readonly int defaultColumns = 12;
         private static readonly int defaultRows = 3;
@@ -55,22 +56,28 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
         public StaticFilterGump(GameObject selectedObject) : base(GetWidth(), GetHeight(), 800, 500, 0, 0)
         {
-            CanCloseWithEsc = true;
-            AcceptMouseInput = true;
-            EnsureSelectedObject(selectedObject);
-            LoadFiles();
-            GumpBuild();
+            try
+            {
+                CanCloseWithEsc = true;
+                AcceptMouseInput = true;
+                EnsureSelectedObject(selectedObject);
+                LoadFiles();
+                GumpBuild();
+            }
+            catch (Exception ex)
+            {
+                GameActions.LogError(ex.Message);                
+            }            
         }
         private void LoadFiles()
         {
-            Walls = StaticFilters.PreferencesWallMannager.LoadFile();
-            for (int i = 0; i < Walls.Count; i++)
+            currentCustomItens = preferenceManager.LoadFile();
+            for (int i = 0; i < currentCustomItens.Count; i++)
             {
-                if (Walls[i].ToReplaceGraphicArray.Contains(Graphic.Value))
+                if (currentCustomItens[i].ToReplaceGraphicArray.Contains(Graphic.Value))
                     currentPos = i;
             }
         }
-
         public void ClearItens()
         {
             StaticFilterItem[] items = GetControls<StaticFilterItem>(scrollArea);
@@ -78,18 +85,36 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 item.Parent = null;
                 item.Dispose();
-            }           
+            }
         }
         public void EnsureSelectedObject(GameObject selectedObject)
         {
             Graphic = selectedObject.Graphic;
+            StaticTiles _itemData;
             if (selectedObject is Static stat)
             {
-                if (stat.ItemData.IsWall)
-                    Type = "Wall";
-                if (stat.ItemData.IsDoor)
-                    Type = "Door";
+                _itemData = stat.ItemData;
             }
+            else if (selectedObject is Item item)
+            {
+                _itemData = item.ItemData;
+            }
+            else
+            {
+                return;
+            }
+
+            if (_itemData.IsWall && !_itemData.IsDoor)
+            {
+                Type = "Wall";
+                preferenceManager = StaticFilters.PreferencesWallMannager;
+            }
+            else if (_itemData.IsDoor)
+            {
+                Type = "Door";
+                preferenceManager = StaticFilters.PreferencesDoorMannager;
+            }
+
         }
         #region GumpBuild             
         private void GumpBuild()
@@ -136,8 +161,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 if (e.Key == SDL2.SDL.SDL_Keycode.SDLK_RETURN)
                 {
                     if (!string.IsNullOrEmpty(preferenceNameTextBox.Text))
-                    {                        
-                        Walls[currentPos].Description = preferenceNameTextBox.Text;
+                    {
+                        currentCustomItens[currentPos].Description = preferenceNameTextBox.Text;
                         UpdateFields();
                     }
                 }
@@ -168,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             next.SetTooltip("Next");
             next.MouseUp += (s, e) =>
             {
-                if (e.Button == MouseButtonType.Left && currentPos < Walls.Count)
+                if (e.Button == MouseButtonType.Left && currentPos < currentCustomItens.Count)
                 {
                     currentPos++;
                     ClearItens();
@@ -183,10 +208,10 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    if (!Walls.Any(X => X.Description == preferenceNameTextBox.Text))
+                    if (!currentCustomItens.Any(X => X.Description == preferenceNameTextBox.Text))
                     {
-                        Walls.Add(new StaticCustomItens() { Description = preferenceNameTextBox.Text });
-                        currentPos = Walls.Count-1;
+                        currentCustomItens.Add(new StaticCustomItens() { Description = preferenceNameTextBox.Text });
+                        currentPos = currentCustomItens.Count - 1;
                         ClearItens();
                         UpdateFields();
                     }
@@ -215,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     if (!string.IsNullOrEmpty(replaceToGraphicTextBox.Text))
                     {
                         var graphic = (ushort)Convert.ToInt32(replaceToGraphicTextBox.Text);
-                        Walls[currentPos].ReplaceToGraphic = graphic;
+                        currentCustomItens[currentPos].ReplaceToGraphic = graphic;
                         UpdateFields();
                     }
                 }
@@ -235,8 +260,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    StaticFilters.PreferencesWallMannager.SavePreferences(Walls);
-                    StaticFilters.PreferencesWallMannager.ReloadPreferences();
+                    preferenceManager.SavePreferences(currentCustomItens);
+                    preferenceManager.ReloadPreferences();
                 }
             };
 
@@ -262,8 +287,8 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                     if (!string.IsNullOrEmpty(graphicTextBox.Text))
                     {
                         var graphic = (ushort)Convert.ToInt32(graphicTextBox.Text);
-                        if (!Walls[currentPos].ToReplaceGraphicArray.Contains(graphic))
-                            Walls[currentPos].ToReplaceGraphicArray.Add(graphic);
+                        if (!currentCustomItens[currentPos].ToReplaceGraphicArray.Contains(graphic))
+                            currentCustomItens[currentPos].ToReplaceGraphicArray.Add(graphic);
                         UpdateFields();
                     }
                 }
@@ -375,7 +400,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
         public void UpdateFields()
         {
-            if (currentPos <= Walls.Count)
+            if (currentPos <= currentCustomItens.Count)
             {
                 filterSlotManager.GridSlots.Clear();
                 filterSlotManager.slots = 0;
@@ -386,7 +411,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 
         private void EnsureItens()
         {
-            var wall = Walls[currentPos];
+            var wall = currentCustomItens[currentPos];
             preferenceNameTextBox.Text = wall.Description;
             replaceToGraphicTextBox.Text = Convert.ToString(wall.ReplaceToGraphic);
 
@@ -453,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         }
         public override void Dispose()
         {
-            StaticFilters.PreferencesWallMannager.ReloadPreferences();
+            preferenceManager.ReloadPreferences();
             base.Dispose();
         }
     }

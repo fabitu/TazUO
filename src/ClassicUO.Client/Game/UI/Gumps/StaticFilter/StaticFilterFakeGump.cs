@@ -1,4 +1,5 @@
-﻿using ClassicUO.Configuration;
+﻿using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Data.Preferences;
 using ClassicUO.Game.GameObjects;
@@ -19,10 +20,9 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
 {
     internal class StaticFilterFakeGump : Gump
     {
-        private readonly ushort? _graphic;
-
         #region Mannagers
-        private static PreferenceManagerBase currentPreferenceMannager; 
+        private static PreferenceManagerBase currentPreferenceMannager;
+        private static List<StaticCustomItens> currentPreferenceData;
         #endregion
 
         #region CONSTANTS
@@ -36,42 +36,78 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
         public static int borderWidth = 4;
         #endregion
 
-
-        GameObject _seletedObject;
-
+        private readonly GameObject _seletedObject;
         public StaticFilterFakeGump(GameObject seletedObject) : base(0, 0)
         {
             _seletedObject = seletedObject;
-            if (SelectedObject.Object is GameObject gameObject && SelectedObject.Object is Static st)
+            Init();
+        }
+        private void Init()
+        {
+            StaticTiles _itemData;
+            if (SelectedObject.Object is Static @static)
             {
-                _graphic = gameObject.Graphic;
-                if (st.ItemData.IsWall)
-                    currentPreferenceMannager = StaticFilters.PreferencesWallMannager;
-                else if (st.ItemData.IsDoor)
-                    currentPreferenceMannager = StaticFilters.PreferencesDoorMannager;
+                _itemData = @static.ItemData;
+            }
+            else if (SelectedObject.Object is Item item)
+            {
+                _itemData = item.ItemData;
+            }
+            else if (SelectedObject.Object is Multi multi)
+            {
+                _itemData = multi.ItemData;
+            }
+            else
+            {
+                GameActions.Log($"{SelectedObject.Object.GetType()}");
+                return;
+            }
 
-                if (st.ItemData.IsWall || st.ItemData.IsDoor)
-                {
-                    EnsureContextMenu();
-                    ShowContextMenu();
-                }
+            if (_itemData.IsWall && !_itemData.IsDoor)
+            {
+                currentPreferenceMannager = StaticFilters.PreferencesWallMannager;
+                currentPreferenceData = StaticFilters.CustomWalls;
+            }
+            else if (_itemData.IsDoor)
+            {
+                currentPreferenceMannager = StaticFilters.PreferencesDoorMannager;
+                currentPreferenceData = StaticFilters.CustomDoors;
+            }
+
+            if (_itemData.IsWall || _itemData.IsDoor)
+            {
+                EnsureContext();
+                ShowContextMenu();
             }
         }
-        private void EnsureContextMenu()
+        private void EnsureContext()
         {
             ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl();
             ContextMenu.Add("Open", Open);
-            if (_graphic != null) { ContextMenu.Add(ResGumps.Add, AddItem); }
-            if (_graphic != null) { ContextMenu.Add(ResGumps.Remove, RemoveItem); }
+            if (currentPreferenceData.Count > 0)
+            {
+                var item = currentPreferenceData.FirstOrDefault(x => x.ToReplaceGraphicArray.Contains(_seletedObject.Graphic));
+                if (item == null)
+                {
+                    List<ContextMenuItemEntry> entries = [];
+                    foreach (var preferences in currentPreferenceData)
+                    {
+                        if (!preferences.ToReplaceGraphicArray.Contains(_seletedObject.Graphic))
+                            entries.Add(new ContextMenuItemEntry(preferences.Description, () => { AddItem(preferences); }));
+                    }
+                    ContextMenu.Add(ResGumps.Add, entries);
+                }
+                else
+                {
+                    ContextMenu.Add($"{ResGumps.Remove} - {item.Description}", RemoveItem);
+                }
+            }
         }
-
-
         public void ShowContextMenu()
         {
             ContextMenu?.Show();
         }
-
         private void Open()
         {
             StaticFilterGump staticFilterGump = UIManager.GetGump<StaticFilterGump>();
@@ -93,23 +129,16 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
                 staticFilterGump.BringOnTop();
             }
         }
-        private void AddItem()
+        private void AddItem(StaticCustomItens customItem)
         {
-            if (_graphic != null)
-            {
-                currentPreferenceMannager.AddGraphic(null, _graphic.Value);
-                currentPreferenceMannager.ReloadPreferences();
-            }
+            currentPreferenceMannager.AddGraphic(customItem, _seletedObject.Graphic);
+            currentPreferenceMannager.ReloadPreferences();
         }
         private void RemoveItem()
         {
-            if (_graphic != null)
-            {
-                currentPreferenceMannager.RemoveGraphic(_graphic.Value);
-                currentPreferenceMannager.ReloadPreferences();
-            }
+            currentPreferenceMannager.RemoveGraphic(_seletedObject.Graphic);
+            currentPreferenceMannager.ReloadPreferences();
         }
-
         private static int GetWidth(int columns = -1)
         {
             if (columns < 0)
@@ -119,7 +148,6 @@ namespace ClassicUO.Game.UI.Gumps.StaticFilter
             + gridItemSize * columns //How many items to fit in left to right
             + X_SPACING * columns;      //Spacing between each grid item(x columns)
         }
-
         private static int GetHeight(int rows = -1)
         {
             if (rows < 0)
